@@ -1,5 +1,13 @@
 import { Redirect, type Href } from "expo-router";
 
+import { useAuth } from "@/lib/auth-context";
+
 export default function Home() {
-  return <Redirect href={"/meal-tracker" as Href} />;
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) {
+    return null;
+  }
+
+  return <Redirect href={(user ? "/meal-tracker" : "/login") as Href} />;
 }
