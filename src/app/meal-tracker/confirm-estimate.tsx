@@ -26,16 +26,20 @@ export default function ConfirmEstimateScreen() {
 
   const confirm = async () => {
     if (!estimate) return;
-    await createEntry({
-      meal_slot: "snack",
-      source: "photo_ai",
-      logged_at: new Date().toISOString(),
-      calories: Number(calories) || 0,
-      protein_g: estimate.protein_g,
-      carbs_g: estimate.carbs_g,
-      fat_g: estimate.fat_g,
-    });
-    router.dismissAll();
+    try {
+      await createEntry({
+        meal_slot: "snack",
+        source: "photo_ai",
+        logged_at: new Date().toISOString(),
+        calories: Number(calories) || 0,
+        protein_g: estimate.protein_g,
+        carbs_g: estimate.carbs_g,
+        fat_g: estimate.fat_g,
+      });
+      router.dismissAll();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "failed to log meal");
+    }
   };
 
   return (
@@ -55,9 +59,9 @@ export default function ConfirmEstimateScreen() {
           />
           <Button title="Log This Meal" onPress={confirm} />
         </View>
-      ) : (
+      ) : !error ? (
         <Text>Estimating…</Text>
-      )}
+      ) : null}
     </SafeAreaView>
   );
 }
