@@ -60,3 +60,32 @@ def test_me_without_token_is_rejected(client):
     response = client.get("/auth/me")
 
     assert response.status_code == 403
+
+
+def test_oauth_login_creates_user_on_first_sign_in(client):
+    response = client.post("/auth/oauth/google", json={"id_token": "newuser@example.com"})
+
+    assert response.status_code == 200
+    assert response.json()["access_token"]
+
+
+def test_oauth_login_reuses_existing_user(client):
+    first = client.post("/auth/oauth/google", json={"id_token": "same@example.com"})
+    second = client.post("/auth/oauth/google", json={"id_token": "same@example.com"})
+
+    me1 = client.get("/auth/me", headers={"Authorization": f"Bearer {first.json()['access_token']}"})
+    me2 = client.get("/auth/me", headers={"Authorization": f"Bearer {second.json()['access_token']}"})
+
+    assert me1.json()["id"] == me2.json()["id"]
+
+
+def test_oauth_login_rejects_invalid_token(client):
+    response = client.post("/auth/oauth/google", json={"id_token": "invalid"})
+
+    assert response.status_code == 401
+
+
+def test_oauth_login_rejects_unknown_provider(client):
+    response = client.post("/auth/oauth/facebook", json={"id_token": "someone@example.com"})
+
+    assert response.status_code == 400

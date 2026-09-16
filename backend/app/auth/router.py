@@ -3,7 +3,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from ..config import settings
 from ..deps import get_current_user_id, get_user_repo
 from ..security import create_token, decode_token, hash_password, verify_password
-from .models import LoginRequest, RefreshRequest, RegisterRequest, TokenPair, UserOut
+from .models import LoginRequest, OAuthRequest, RefreshRequest, RegisterRequest, TokenPair, UserOut
+from .oauth import get_oauth_verifier
 
 router = APIRouter()
 
@@ -48,3 +49,18 @@ async def me(user_id: str = Depends(get_current_user_id), user_repo=Depends(get_
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="user no longer exists")
     return UserOut(id=user["id"], email=user["email"])
+
+
+@router.post("/oauth/{provider}", response_model=TokenPair)
+async def oauth_login(provider: str, body: OAuthRequest, user_repo=Depends(get_user_repo)):
+    verifier = get_oauth_verifier(provider)
+    if verifier is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"unsupported provider: {provider}")
+    try:
+        email = await verifier.verify(body.id_token)
+    except Exception:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid oauth token")
+    user = await user_repo.get_by_email(email)
+    if not user:
+        user = await user_repo.create({"email": email, "password_hash": ""})
+    return _token_pair(user["id"])
