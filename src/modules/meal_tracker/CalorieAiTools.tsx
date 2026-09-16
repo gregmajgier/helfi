@@ -7,7 +7,7 @@ export default function CalorieAiTools() {
     return <View>
        <Button
          title="Take a Photo"
-         onPress={() => router.push("/calorie-ai-tools/camera" as Href)}
+         onPress={() => router.push("/meal-tracker/camera" as Href)}
        />
        <Button title="View History" onPress={() => {}} />
        <Button title="Settings" onPress={() => {}} />

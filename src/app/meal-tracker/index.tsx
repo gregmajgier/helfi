@@ -1,7 +1,7 @@
-import CalorieAiTools from "@/modules/calorie_camera/CalorieAiTools";
+import CalorieAiTools from "@/modules/meal_tracker/CalorieAiTools";
 import { SafeAreaView } from "react-native";
 
-export default function CalorieAiToolsRoute() {
+export default function MealTrackerRoute() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <CalorieAiTools />
