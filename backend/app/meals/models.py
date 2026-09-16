@@ -43,3 +43,12 @@ class MealEntryOut(MealEntryCreate):
     user_id: str
     created_at: str
     updated_at: str
+
+
+class PhotoEstimateOut(BaseModel):
+    calories: float
+    protein_g: float
+    carbs_g: float
+    fat_g: float
+    confidence: float
+    description: str

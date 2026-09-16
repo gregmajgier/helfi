@@ -62,3 +62,24 @@ def test_user_cannot_read_or_modify_another_users_entry(client, auth_headers):
 
     delete = client.delete(f"/meals/entries/{entry_id}", headers=headers_b)
     assert delete.status_code == 404
+
+
+def test_photo_estimate_returns_estimate(client, auth_headers):
+    headers = auth_headers()
+    files = {"photo": ("meal.jpg", b"fake-image-bytes", "image/jpeg")}
+
+    response = client.post("/meals/photo-estimate", headers=headers, files=files)
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["calories"] > 0
+    assert 0 <= body["confidence"] <= 1
+
+
+def test_photo_estimate_rejects_unsupported_file_type(client, auth_headers):
+    headers = auth_headers()
+    files = {"photo": ("notes.txt", b"not an image", "text/plain")}
+
+    response = client.post("/meals/photo-estimate", headers=headers, files=files)
+
+    assert response.status_code == 400
