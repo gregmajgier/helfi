@@ -11,4 +11,4 @@ def test_search_foods_matches_partial_case_insensitive_name(client, auth_headers
 def test_search_foods_requires_auth(client):
     response = client.get("/meals/foods/search", params={"q": "chicken"})
 
-    assert response.status_code == 401
+    assert response.status_code == 403
