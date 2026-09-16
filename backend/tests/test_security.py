@@ -10,6 +10,10 @@ def test_hash_password_and_verify_roundtrip():
     assert not verify_password("wrong password", hashed)
 
 
+def test_verify_password_returns_false_for_malformed_hash():
+    assert verify_password("anything", "") is False
+
+
 def test_create_and_decode_access_token_roundtrip():
     token = create_token("user-123", "test-secret", "access")
 

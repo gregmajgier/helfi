@@ -89,3 +89,13 @@ def test_oauth_login_rejects_unknown_provider(client):
     response = client.post("/auth/oauth/facebook", json={"id_token": "someone@example.com"})
 
     assert response.status_code == 400
+
+
+def test_login_with_password_for_oauth_only_user_is_rejected_not_crashed(client):
+    client.post("/auth/oauth/google", json={"id_token": "oauthonly@example.com"})
+
+    response = client.post(
+        "/auth/login", json={"email": "oauthonly@example.com", "password": "anything"}
+    )
+
+    assert response.status_code == 401
