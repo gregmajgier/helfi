@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
-import { apiFetch, clearTokens, getStoredTokens, storeTokens } from "./api-client";
+import { apiFetch, clearTokens, getStoredTokens, setUnauthorizedHandler, storeTokens } from "./api-client";
 
 type User = { id: string; email: string };
 
@@ -23,6 +23,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    setUnauthorizedHandler(() => setUser(null));
     (async () => {
       const { accessToken } = await getStoredTokens();
       if (accessToken) {

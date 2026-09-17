@@ -13,43 +13,58 @@ export default function AddEntryScreen() {
   const [results, setResults] = useState<FoodOut[]>([]);
   const [mealSlot, setMealSlot] = useState<MealSlot>("breakfast");
   const [quickAddCalories, setQuickAddCalories] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   const onSearch = async (text: string) => {
     setQuery(text);
-    setResults(text.length >= 2 ? await searchFoods(text) : []);
+    try {
+      setResults(text.length >= 2 ? await searchFoods(text) : []);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "search failed");
+    }
   };
 
   const logFood = async (food: FoodOut) => {
-    await createEntry({
-      meal_slot: mealSlot,
-      source: "search",
-      logged_at: new Date().toISOString(),
-      food_id: food.id,
-      calories: food.calories_per_serving,
-      protein_g: food.protein_g,
-      carbs_g: food.carbs_g,
-      fat_g: food.fat_g,
-    });
-    router.back();
+    try {
+      await createEntry({
+        meal_slot: mealSlot,
+        source: "search",
+        logged_at: new Date().toISOString(),
+        food_id: food.id,
+        calories: food.calories_per_serving,
+        protein_g: food.protein_g,
+        carbs_g: food.carbs_g,
+        fat_g: food.fat_g,
+      });
+      router.back();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "failed to log food");
+    }
   };
 
   const logQuickAdd = async () => {
     const calories = Number(quickAddCalories);
     if (!Number.isFinite(calories) || calories <= 0) return;
-    await createEntry({
-      meal_slot: mealSlot,
-      source: "quick_add",
-      logged_at: new Date().toISOString(),
-      calories,
-      protein_g: 0,
-      carbs_g: 0,
-      fat_g: 0,
-    });
-    router.back();
+    try {
+      await createEntry({
+        meal_slot: mealSlot,
+        source: "quick_add",
+        logged_at: new Date().toISOString(),
+        calories,
+        protein_g: 0,
+        carbs_g: 0,
+        fat_g: 0,
+      });
+      router.back();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "failed to log quick add");
+    }
   };
 
   return (
     <SafeAreaView style={{ flex: 1, padding: 16, gap: 12 }}>
+      {error ? <Text style={{ color: "red" }}>{error}</Text> : null}
       <View style={{ flexDirection: "row", gap: 8 }}>
         {MEAL_SLOTS.map((slot) => (
           <Button

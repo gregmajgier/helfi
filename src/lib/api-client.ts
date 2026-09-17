@@ -30,6 +30,12 @@ export async function clearTokens() {
 
 export class UnauthorizedError extends Error {}
 
+let unauthorizedHandler: (() => void) | null = null;
+
+export function setUnauthorizedHandler(handler: () => void) {
+  unauthorizedHandler = handler;
+}
+
 async function refreshAccessToken(): Promise<string | null> {
   const { refreshToken } = await getStoredTokens();
   if (!refreshToken) return null;
@@ -63,6 +69,7 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
     const newAccessToken = await refreshAccessToken();
     if (!newAccessToken) {
       await clearTokens();
+      unauthorizedHandler?.();
       throw new UnauthorizedError("session expired");
     }
     response = await doFetch(newAccessToken);

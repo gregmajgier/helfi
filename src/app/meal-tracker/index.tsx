@@ -13,11 +13,15 @@ export default function MealTrackerRoute() {
   const router = useRouter();
   const [entries, setEntries] = useState<MealEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setIsLoading(true);
     try {
       setEntries(await listEntriesForDay(todayIsoDate()));
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "failed to load entries");
     } finally {
       setIsLoading(false);
     }
@@ -47,6 +51,8 @@ export default function MealTrackerRoute() {
         {Math.round(totals.carbs_g)}g · F {Math.round(totals.fat_g)}g
       </Text>
 
+      {error ? <Text style={{ color: "red" }}>{error}</Text> : null}
+
       <FlatList
         data={entries}
         keyExtractor={(item) => item.id}
@@ -61,8 +67,13 @@ export default function MealTrackerRoute() {
             <Button
               title="Delete"
               onPress={async () => {
-                await deleteEntry(item.id);
-                load();
+                try {
+                  await deleteEntry(item.id);
+                  setError(null);
+                  load();
+                } catch (err) {
+                  setError(err instanceof Error ? err.message : "failed to delete entry");
+                }
               }}
             />
           </View>

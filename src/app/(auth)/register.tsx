@@ -13,6 +13,10 @@ export default function RegisterScreen() {
 
   const onSubmit = async () => {
     setError(null);
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters");
+      return;
+    }
     try {
       await register(email, password);
       router.replace("/meal-tracker" as Href);
