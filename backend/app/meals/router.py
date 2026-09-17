@@ -61,6 +61,7 @@ async def delete_entry(
 
 
 ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
+MAX_PHOTO_BYTES = 10 * 1024 * 1024
 
 
 @router.post("/photo-estimate", response_model=PhotoEstimateOut)
@@ -73,4 +74,6 @@ async def photo_estimate(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="unsupported image type")
     estimator = get_nutrition_estimator()
     image_bytes = await photo.read()
+    if len(image_bytes) > MAX_PHOTO_BYTES:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="photo too large")
     return await estimator.estimate(image_bytes, content_type)

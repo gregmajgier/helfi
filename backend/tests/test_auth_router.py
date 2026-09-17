@@ -22,6 +22,15 @@ def test_register_duplicate_email_is_rejected(client):
     )
 
     assert response.status_code == 409
+    assert response.json() == {"error": {"code": "409", "message": "email already registered"}}
+
+
+def test_register_with_short_password_is_rejected(client):
+    response = client.post(
+        "/auth/register", json={"email": "shortpw@example.com", "password": "short12"}
+    )
+
+    assert response.status_code == 422
 
 
 def test_login_with_wrong_password_is_rejected(client):

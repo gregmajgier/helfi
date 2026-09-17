@@ -64,6 +64,17 @@ def test_user_cannot_read_or_modify_another_users_entry(client, auth_headers):
     assert delete.status_code == 404
 
 
+def test_list_entries_excludes_other_users_entries(client, auth_headers):
+    headers_a = auth_headers(email="owner2@example.com")
+    headers_b = auth_headers(email="intruder2@example.com")
+    client.post("/meals/entries", json=ENTRY_PAYLOAD, headers=headers_a)
+
+    listing = client.get("/meals/entries", params={"day": "2026-09-16"}, headers=headers_b)
+
+    assert listing.status_code == 200
+    assert listing.json() == []
+
+
 def test_photo_estimate_returns_estimate(client, auth_headers):
     headers = auth_headers()
     files = {"photo": ("meal.jpg", b"fake-image-bytes", "image/jpeg")}
@@ -79,6 +90,16 @@ def test_photo_estimate_returns_estimate(client, auth_headers):
 def test_photo_estimate_rejects_unsupported_file_type(client, auth_headers):
     headers = auth_headers()
     files = {"photo": ("notes.txt", b"not an image", "text/plain")}
+
+    response = client.post("/meals/photo-estimate", headers=headers, files=files)
+
+    assert response.status_code == 400
+
+
+def test_photo_estimate_rejects_oversized_photo(client, auth_headers):
+    headers = auth_headers()
+    oversized_bytes = b"x" * (10 * 1024 * 1024 + 1)
+    files = {"photo": ("meal.jpg", oversized_bytes, "image/jpeg")}
 
     response = client.post("/meals/photo-estimate", headers=headers, files=files)
 

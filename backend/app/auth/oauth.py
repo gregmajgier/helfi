@@ -56,16 +56,17 @@ _built = False
 
 def _build_verifiers() -> dict[str, OAuthVerifier]:
     verifiers: dict[str, OAuthVerifier] = {}
-    verifiers["google"] = (
-        GoogleOAuthVerifier(settings.google_oauth_client_id)
-        if settings.google_oauth_client_id
-        else FakeOAuthVerifier()
-    )
-    verifiers["apple"] = (
-        AppleOAuthVerifier(settings.apple_oauth_bundle_id)
-        if settings.apple_oauth_bundle_id
-        else FakeOAuthVerifier()
-    )
+
+    if settings.google_oauth_client_id:
+        verifiers["google"] = GoogleOAuthVerifier(settings.google_oauth_client_id)
+    elif settings.environment != "production":
+        verifiers["google"] = FakeOAuthVerifier()
+
+    if settings.apple_oauth_bundle_id:
+        verifiers["apple"] = AppleOAuthVerifier(settings.apple_oauth_bundle_id)
+    elif settings.environment != "production":
+        verifiers["apple"] = FakeOAuthVerifier()
+
     return verifiers
 
 
@@ -75,3 +76,10 @@ def get_oauth_verifier(provider: str) -> Optional[OAuthVerifier]:
         _verifiers = _build_verifiers()
         _built = True
     return _verifiers.get(provider)
+
+
+def reset_oauth_verifier_cache() -> None:
+    """Test helper: force the next get_oauth_verifier() call to rebuild from current settings."""
+    global _verifiers, _built
+    _verifiers = {}
+    _built = False
