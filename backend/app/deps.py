@@ -2,7 +2,12 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from .config import settings
-from .db.cosmos import CosmosMealEntryRepository, CosmosUserRepository, get_cosmos_client
+from .db.cosmos import (
+    CosmosFoodRepository,
+    CosmosMealEntryRepository,
+    CosmosUserRepository,
+    get_cosmos_client,
+)
 from .db.memory import (
     SEED_FOODS,
     InMemoryFoodRepository,
@@ -31,6 +36,8 @@ def get_meal_entry_repo():
 
 
 def get_food_repo():
+    if settings.db_backend == "cosmos":
+        return CosmosFoodRepository(get_cosmos_client(), settings.cosmos_database_name)
     return _food_repo
 
 

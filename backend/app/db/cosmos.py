@@ -17,12 +17,20 @@ def get_cosmos_client() -> CosmosClient:
     return _client
 
 
+async def close_cosmos_client() -> None:
+    global _client
+    if _client is not None:
+        await _client.close()
+        _client = None
+
+
 async def init_cosmos(client: CosmosClient, database_name: str) -> None:
     database = await client.create_database_if_not_exists(database_name)
     await database.create_container_if_not_exists(id="users", partition_key=PartitionKey(path="/id"))
     await database.create_container_if_not_exists(
         id="meal_entries", partition_key=PartitionKey(path="/user_id")
     )
+    await database.create_container_if_not_exists(id="foods", partition_key=PartitionKey(path="/id"))
 
 
 class CosmosUserRepository:
@@ -109,3 +117,25 @@ class CosmosMealEntryRepository:
             return False
         await self._container().delete_item(item=entry_id, partition_key=user_id)
         return True
+
+
+class CosmosFoodRepository:
+    def __init__(self, client: CosmosClient, database_name: str):
+        self._client = client
+        self._database_name = database_name
+
+    def _container(self):
+        return self._client.get_database_client(self._database_name).get_container_client("foods")
+
+    async def search(self, query: str) -> list[dict]:
+        container = self._container()
+        sql_query = "SELECT * FROM c WHERE CONTAINS(LOWER(c.name), @query)"
+        params = [{"name": "@query", "value": query.lower()}]
+        return [item async for item in container.query_items(query=sql_query, parameters=params)]
+
+    async def get(self, food_id: str) -> Optional[dict]:
+        container = self._container()
+        try:
+            return await container.read_item(item=food_id, partition_key=food_id)
+        except Exception:
+            return None

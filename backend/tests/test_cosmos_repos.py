@@ -1,7 +1,7 @@
 from datetime import date
 from unittest.mock import AsyncMock, MagicMock
 
-from app.db.cosmos import CosmosMealEntryRepository, CosmosUserRepository
+from app.db.cosmos import CosmosFoodRepository, CosmosMealEntryRepository, CosmosUserRepository
 
 
 def _client_with_container(container: MagicMock) -> MagicMock:
@@ -38,3 +38,23 @@ async def test_meal_entry_repository_list_for_day_queries_by_partition_key():
     entries = await repo.list_for_day("user-1", date(2026, 9, 16))
 
     assert [e["id"] for e in entries] == ["e1"]
+
+
+async def test_food_repository_search_queries_case_insensitive_substring():
+    container = MagicMock()
+    captured = {}
+
+    async def fake_query_items(query, parameters):
+        captured["query"] = query
+        captured["parameters"] = parameters
+        for item in [{"id": "chicken-breast", "name": "Chicken Breast, cooked"}]:
+            yield item
+
+    container.query_items = fake_query_items
+    repo = CosmosFoodRepository(_client_with_container(container), "health_app")
+
+    results = await repo.search("CHICK")
+
+    assert [f["id"] for f in results] == ["chicken-breast"]
+    assert "CONTAINS(LOWER(c.name)" in captured["query"]
+    assert captured["parameters"] == [{"name": "@query", "value": "chick"}]
