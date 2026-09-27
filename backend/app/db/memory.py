@@ -100,3 +100,71 @@ SEED_FOODS: list[dict] = [
         "calories_per_serving": 78, "protein_g": 6.3, "carbs_g": 0.6, "fat_g": 5.3,
     },
 ]
+
+
+class InMemoryWorkoutRepository:
+    def __init__(self):
+        self._workouts: dict[str, dict] = {}
+
+    async def create(self, workout: dict) -> dict:
+        workout_id = str(uuid.uuid4())
+        now = datetime.now(timezone.utc).isoformat()
+        record = {**workout, "id": workout_id, "created_at": now, "updated_at": now}
+        self._workouts[workout_id] = record
+        return record
+
+    async def list_for_user(self, user_id: str, workout_type: Optional[str] = None) -> list[dict]:
+        results = [w for w in self._workouts.values() if w["user_id"] == user_id]
+        if workout_type is not None:
+            results = [w for w in results if w["type"] == workout_type]
+        return sorted(results, key=lambda w: w["started_at"], reverse=True)
+
+    async def get(self, user_id: str, workout_id: str) -> Optional[dict]:
+        workout = self._workouts.get(workout_id)
+        return workout if workout and workout["user_id"] == user_id else None
+
+    async def update(self, user_id: str, workout_id: str, updates: dict) -> Optional[dict]:
+        workout = await self.get(user_id, workout_id)
+        if not workout:
+            return None
+        workout.update(updates)
+        workout["updated_at"] = datetime.now(timezone.utc).isoformat()
+        return workout
+
+    async def delete(self, user_id: str, workout_id: str) -> bool:
+        workout = await self.get(user_id, workout_id)
+        if not workout:
+            return False
+        del self._workouts[workout["id"]]
+        return True
+
+
+class InMemoryExerciseRepository:
+    def __init__(self, seed: list[dict]):
+        self._exercises = {e["id"]: dict(e) for e in seed}
+
+    async def search(self, query: str) -> list[dict]:
+        q = query.lower()
+        return [e for e in self._exercises.values() if q in e["name"].lower()]
+
+    async def get(self, exercise_id: str) -> Optional[dict]:
+        return self._exercises.get(exercise_id)
+
+    async def create(self, exercise: dict) -> dict:
+        exercise_id = str(uuid.uuid4())
+        record = {**exercise, "id": exercise_id}
+        self._exercises[exercise_id] = record
+        return record
+
+
+SEED_EXERCISES: list[dict] = [
+    {"id": "bench-press", "name": "Bench Press", "category": "chest", "is_bodyweight": False, "created_by_user_id": None},
+    {"id": "squat", "name": "Barbell Squat", "category": "legs", "is_bodyweight": False, "created_by_user_id": None},
+    {"id": "deadlift", "name": "Deadlift", "category": "back", "is_bodyweight": False, "created_by_user_id": None},
+    {"id": "overhead-press", "name": "Overhead Press", "category": "shoulders", "is_bodyweight": False, "created_by_user_id": None},
+    {"id": "bicep-curl", "name": "Bicep Curl", "category": "arms", "is_bodyweight": False, "created_by_user_id": None},
+    {"id": "pull-up", "name": "Pull-Up", "category": "back", "is_bodyweight": True, "created_by_user_id": None},
+    {"id": "push-up", "name": "Push-Up", "category": "chest", "is_bodyweight": True, "created_by_user_id": None},
+    {"id": "plank", "name": "Plank", "category": "core", "is_bodyweight": True, "created_by_user_id": None},
+    {"id": "lunge", "name": "Lunge", "category": "legs", "is_bodyweight": True, "created_by_user_id": None},
+]

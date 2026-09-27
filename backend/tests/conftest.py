@@ -7,7 +7,15 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app import deps
-from app.db.memory import SEED_FOODS, InMemoryFoodRepository, InMemoryMealEntryRepository, InMemoryUserRepository
+from app.db.memory import (
+    SEED_EXERCISES,
+    SEED_FOODS,
+    InMemoryExerciseRepository,
+    InMemoryFoodRepository,
+    InMemoryMealEntryRepository,
+    InMemoryUserRepository,
+    InMemoryWorkoutRepository,
+)
 from app.main import app
 
 
@@ -16,10 +24,14 @@ def client():
     user_repo = InMemoryUserRepository()
     meal_entry_repo = InMemoryMealEntryRepository()
     food_repo = InMemoryFoodRepository(SEED_FOODS)
+    workout_repo = InMemoryWorkoutRepository()
+    exercise_repo = InMemoryExerciseRepository(SEED_EXERCISES)
 
     app.dependency_overrides[deps.get_user_repo] = lambda: user_repo
     app.dependency_overrides[deps.get_meal_entry_repo] = lambda: meal_entry_repo
     app.dependency_overrides[deps.get_food_repo] = lambda: food_repo
+    app.dependency_overrides[deps.get_workout_repo] = lambda: workout_repo
+    app.dependency_overrides[deps.get_exercise_repo] = lambda: exercise_repo
 
     with TestClient(app) as test_client:
         yield test_client
