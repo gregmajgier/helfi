@@ -3,9 +3,11 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from .config import settings
 from .db.cosmos import (
+    CosmosExerciseRepository,
     CosmosFoodRepository,
     CosmosMealEntryRepository,
     CosmosUserRepository,
+    CosmosWorkoutRepository,
     get_cosmos_client,
 )
 from .db.memory import (
@@ -47,10 +49,14 @@ def get_food_repo():
 
 
 def get_workout_repo():
+    if settings.db_backend == "cosmos":
+        return CosmosWorkoutRepository(get_cosmos_client(), settings.cosmos_database_name)
     return _memory_workout_repo
 
 
 def get_exercise_repo():
+    if settings.db_backend == "cosmos":
+        return CosmosExerciseRepository(get_cosmos_client(), settings.cosmos_database_name)
     return _exercise_repo
 
 

@@ -31,6 +31,10 @@ async def init_cosmos(client: CosmosClient, database_name: str) -> None:
         id="meal_entries", partition_key=PartitionKey(path="/user_id")
     )
     await database.create_container_if_not_exists(id="foods", partition_key=PartitionKey(path="/id"))
+    await database.create_container_if_not_exists(
+        id="workouts", partition_key=PartitionKey(path="/user_id")
+    )
+    await database.create_container_if_not_exists(id="exercises", partition_key=PartitionKey(path="/id"))
 
 
 class CosmosUserRepository:
@@ -139,3 +143,83 @@ class CosmosFoodRepository:
             return await container.read_item(item=food_id, partition_key=food_id)
         except Exception:
             return None
+
+
+class CosmosWorkoutRepository:
+    def __init__(self, client: CosmosClient, database_name: str):
+        self._client = client
+        self._database_name = database_name
+
+    def _container(self):
+        return self._client.get_database_client(self._database_name).get_container_client("workouts")
+
+    async def create(self, workout: dict) -> dict:
+        container = self._container()
+        now = datetime.now(timezone.utc).isoformat()
+        record = {**workout, "id": str(uuid.uuid4()), "created_at": now, "updated_at": now}
+        await container.create_item(record)
+        return record
+
+    async def list_for_user(self, user_id: str, workout_type: Optional[str] = None) -> list[dict]:
+        container = self._container()
+        query = "SELECT * FROM c WHERE c.user_id = @user_id"
+        params = [{"name": "@user_id", "value": user_id}]
+        if workout_type is not None:
+            query += " AND c.type = @type"
+            params.append({"name": "@type", "value": workout_type})
+        items = [
+            item
+            async for item in container.query_items(query=query, parameters=params, partition_key=user_id)
+        ]
+        return sorted(items, key=lambda w: w["started_at"], reverse=True)
+
+    async def get(self, user_id: str, workout_id: str) -> Optional[dict]:
+        container = self._container()
+        try:
+            return await container.read_item(item=workout_id, partition_key=user_id)
+        except Exception:
+            return None
+
+    async def update(self, user_id: str, workout_id: str, updates: dict) -> Optional[dict]:
+        workout = await self.get(user_id, workout_id)
+        if not workout:
+            return None
+        workout.update(updates)
+        workout["updated_at"] = datetime.now(timezone.utc).isoformat()
+        await self._container().replace_item(item=workout_id, body=workout)
+        return workout
+
+    async def delete(self, user_id: str, workout_id: str) -> bool:
+        workout = await self.get(user_id, workout_id)
+        if not workout:
+            return False
+        await self._container().delete_item(item=workout_id, partition_key=user_id)
+        return True
+
+
+class CosmosExerciseRepository:
+    def __init__(self, client: CosmosClient, database_name: str):
+        self._client = client
+        self._database_name = database_name
+
+    def _container(self):
+        return self._client.get_database_client(self._database_name).get_container_client("exercises")
+
+    async def search(self, query: str) -> list[dict]:
+        container = self._container()
+        sql_query = "SELECT * FROM c WHERE CONTAINS(LOWER(c.name), @query)"
+        params = [{"name": "@query", "value": query.lower()}]
+        return [item async for item in container.query_items(query=sql_query, parameters=params)]
+
+    async def get(self, exercise_id: str) -> Optional[dict]:
+        container = self._container()
+        try:
+            return await container.read_item(item=exercise_id, partition_key=exercise_id)
+        except Exception:
+            return None
+
+    async def create(self, exercise: dict) -> dict:
+        container = self._container()
+        record = {**exercise, "id": str(uuid.uuid4())}
+        await container.create_item(record)
+        return record

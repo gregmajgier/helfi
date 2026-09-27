@@ -1,7 +1,13 @@
 from datetime import date
 from unittest.mock import AsyncMock, MagicMock
 
-from app.db.cosmos import CosmosFoodRepository, CosmosMealEntryRepository, CosmosUserRepository
+from app.db.cosmos import (
+    CosmosExerciseRepository,
+    CosmosFoodRepository,
+    CosmosMealEntryRepository,
+    CosmosUserRepository,
+    CosmosWorkoutRepository,
+)
 
 
 def _client_with_container(container: MagicMock) -> MagicMock:
@@ -58,3 +64,53 @@ async def test_food_repository_search_queries_case_insensitive_substring():
     assert [f["id"] for f in results] == ["chicken-breast"]
     assert "CONTAINS(LOWER(c.name)" in captured["query"]
     assert captured["parameters"] == [{"name": "@query", "value": "chick"}]
+
+
+async def test_workout_repository_list_for_user_filters_by_type_and_partition_key():
+    container = MagicMock()
+
+    async def fake_query_items(query, parameters, partition_key):
+        assert partition_key == "user-1"
+        assert "c.type = @type" in query
+        for item in [{"id": "w1", "user_id": "user-1", "type": "running", "started_at": "2026-09-16T08:00:00"}]:
+            yield item
+
+    container.query_items = fake_query_items
+    repo = CosmosWorkoutRepository(_client_with_container(container), "health_app")
+
+    workouts = await repo.list_for_user("user-1", workout_type="running")
+
+    assert [w["id"] for w in workouts] == ["w1"]
+
+
+async def test_exercise_repository_search_queries_case_insensitive_substring():
+    container = MagicMock()
+    captured = {}
+
+    async def fake_query_items(query, parameters):
+        captured["query"] = query
+        captured["parameters"] = parameters
+        for item in [{"id": "bench-press", "name": "Bench Press"}]:
+            yield item
+
+    container.query_items = fake_query_items
+    repo = CosmosExerciseRepository(_client_with_container(container), "health_app")
+
+    results = await repo.search("BENCH")
+
+    assert [e["id"] for e in results] == ["bench-press"]
+    assert "CONTAINS(LOWER(c.name)" in captured["query"]
+    assert captured["parameters"] == [{"name": "@query", "value": "bench"}]
+
+
+async def test_exercise_repository_create_assigns_id():
+    container = MagicMock()
+    container.create_item = AsyncMock()
+    repo = CosmosExerciseRepository(_client_with_container(container), "health_app")
+
+    record = await repo.create(
+        {"name": "Cable Row", "category": "back", "is_bodyweight": False, "created_by_user_id": "user-1"}
+    )
+
+    assert record["id"]
+    container.create_item.assert_awaited_once_with(record)
