@@ -11,7 +11,7 @@ def test_search_exercises_matches_partial_case_insensitive_name(client, auth_hea
 def test_search_exercises_requires_auth(client):
     response = client.get("/workouts/exercises", params={"q": "bench"})
 
-    assert response.status_code == 401
+    assert response.status_code == 403
 
 
 def test_create_custom_exercise_is_then_searchable_by_other_users(client, auth_headers):
@@ -145,4 +145,4 @@ def test_user_cannot_read_or_modify_another_users_workout(client, auth_headers):
 def test_workouts_require_auth(client):
     response = client.get("/workouts")
 
-    assert response.status_code == 401
+    assert response.status_code == 403
