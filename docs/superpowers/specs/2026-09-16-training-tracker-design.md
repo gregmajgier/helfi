@@ -5,53 +5,56 @@ Depends on: [Platform Architecture](2026-09-16-platform-architecture-design.md)
 
 ## Purpose
 
-Log strength training, calisthenics, running, and cycling, with GPS routes for
-cardio, plus import activities from Strava and other wearables/health apps so
-users aren't forced to double-log.
+Log strength training, calisthenics, running, and cycling. Cardio (running/
+cycling) is logged manually (distance, duration, pace) — the app does not do
+its own GPS recording. Importing activities from Strava/Apple Health/etc. is
+deferred to a later version (see Out of scope below); v1 is manual-only for
+every activity type.
 
 ## Scope
 
 - Manual strength/calisthenics logging: exercises, sets, reps, weight (or
   bodyweight flag), rest, organized into a workout session.
 - Exercise library: predefined common exercises + user-added custom ones.
-- GPS-tracked cardio: start/pause/stop recording for running and cycling,
-  route map, distance, pace/speed, elevation, duration.
+- Manual cardio logging: running/cycling entries with distance, duration,
+  pace/speed, elevation gain (optional) — no in-app GPS recording or route
+  map.
 - Session history with per-activity-type stats over time.
-- **Integrations sub-module**: Strava OAuth2 connection to import (and
-  optionally export) activities; architecture supports adding more providers
-  (Apple Health, Google Fit/Health Connect, Garmin) as additional connectors
-  without changing core logging.
 
 ## Out of scope (this phase)
 
+- **Integrations sub-module (Strava, Apple Health, Google Fit/Health
+  Connect, Garmin, etc.)** — deferred to a future version. v1 has no OAuth
+  connections, background sync worker, or imported-activity dedupe; the
+  `source`/`external_id` fields stay in the data model so this can be added
+  later without a schema migration, but no integration code ships in v1.
+  Users who want GPS-tracked runs/rides record them in Strava or their
+  device's native health app for now, with manual re-entry into this app in
+  the meantime.
+- In-app GPS tracking (start/pause/stop recording, live route map,
+  foreground/background location permissions).
 - Workout program builder / periodization plans.
-- Social features (kudos, following, leaderboards) — Strava already does this
-  well; we just import the activity data.
-- Live coaching cues during a GPS-tracked session.
+- Social features (kudos, following, leaderboards).
+- Live coaching cues during a tracked session.
 
 ## Architecture notes specific to this module
 
-- GPS tracking needs foreground location during an active session and,
-  ideally, background location so a run/ride keeps recording if the phone
-  locks — this requires the `expo-location` background permission flow and
-  platform-specific background modes; confirm at implementation time against
-  the current Expo v57 docs (per AGENTS.md) since background location
-  handling is an area Expo revises often.
-- Route rendering needs a maps SDK (`react-native-maps` or Expo's maps
-  module) — not yet in `package.json`, to be added when this module starts.
-- **Integrations run server-side.** Strava tokens (OAuth access/refresh) are
-  stored server-side per user; a background worker in the Container App polls
-  Strava's API (or handles their webhook) and writes normalized `workouts`
-  records, so the phone doesn't need to be open for an import to happen, and
-  the diary/history UI reads one unified format regardless of source.
+- No location permissions or maps SDK are needed for this module since GPS
+  recording is out of scope — cardio entries are manual only in v1.
+- No server-side integration/background-worker infrastructure is needed in
+  v1. When the integrations sub-module is built later, tokens would be
+  stored server-side per user and a background worker in the Container App
+  would poll the provider's API (or handle their webhook) to write
+  normalized `workouts` records — noted here so the deferred design isn't
+  lost, not as current-phase work.
 
 ## Data model
 
 **`workouts` container** (per-user, partitioned by `/user_id`):
 ```
 { id, user_id, type: "strength"|"calisthenics"|"running"|"cycling",
-  source: "manual"|"strava"|"apple_health"|"google_fit",
-  external_id?,           // dedupe key for imported activities
+  source: "manual",       // "strava"|"apple_health"|"google_fit" reserved for a future version
+  external_id?,           // reserved: dedupe key for imported activities (unused in v1)
   started_at, duration_s,
   // strength/calisthenics:
   exercises?: [{ exercise_id, sets: [{reps, weight_kg?, bodyweight?}] }],
@@ -63,9 +66,8 @@ users aren't forced to double-log.
 **`exercises` container** (global + user-custom, same pattern as `foods` in
 the meal tracker): `{ id, name, category, is_bodyweight, created_by_user_id? }`.
 
-**`integration_connections` container** (per-user): `{ id, user_id, provider,
-access_token, refresh_token, expires_at, last_synced_at }` — tokens encrypted
-at rest.
+Not built in v1: `integration_connections` container — add it when the
+integrations sub-module is picked up.
 
 ## API (`/workouts` router)
 
@@ -73,39 +75,35 @@ at rest.
 - `PATCH/DELETE /workouts/{id}`.
 - `GET /workouts/exercises` — library search.
 - `POST /workouts/exercises` — add a custom exercise.
-- `POST /workouts/integrations/strava/connect` — OAuth callback handler.
-- `DELETE /workouts/integrations/strava` — disconnect.
-- `GET /workouts/live/start` / `POST /workouts/live/{id}/finish` — server
-  records for an in-progress GPS session, so an interrupted app doesn't lose
-  an in-progress activity (client also buffers points locally and reconciles
-  on finish).
+
+Not built in v1: `/workouts/integrations/*` (Strava connect/disconnect and
+any other provider) — add when the integrations sub-module is picked up.
 
 ## Client structure
 
 - `src/app/training-tracker/` — history (home), log-strength, log-cardio
-  (live map + start/pause/stop), exercise-library, integrations-settings.
-- `src/modules/training_tracker/` — session state machine (idle/recording/
-  paused/finished), GPS point buffering, exercise/set form state.
+  (manual entry form: distance/duration/pace), exercise-library.
+- `src/modules/training_tracker/` — exercise/set form state, cardio entry
+  form state.
+
+Not built in v1: an `integrations-settings` screen — add alongside the
+integrations sub-module.
 
 ## Error handling
 
-- GPS signal loss mid-session: keep recording elapsed time/duration, mark the
-  route as having a gap rather than failing the whole session.
-- Strava sync failures (expired token, rate limit): surface a "reconnect
-  Strava" prompt rather than silently dropping imports; retry transient
-  failures with backoff in the background worker.
+- Standard validation errors on manual entry (missing required fields,
+  negative distance/duration, etc.) — no integration-sync error handling is
+  needed in v1.
 
 ## Testing
 
-- Backend contract tests: workout CRUD, ownership, Strava token
-  refresh/expiry handling, dedupe on re-import (`external_id` uniqueness).
-- Manual QA: full GPS session on-device (simulators don't exercise real GPS
-  behavior), plus a real Strava account for the import flow.
+- Backend contract tests: workout CRUD, ownership.
+- Manual QA: manual strength and cardio logging flows end-to-end.
 
 ## Open assumptions to confirm
 
-- Strava is the first/reference integration; Apple Health & Google Fit are
-  named as follow-ups in the same sub-module, not built in the first pass —
-  confirm that sequencing is fine.
 - Distances/weights stored metric (km, kg) with unit conversion at the
   display layer — flag if you want imperial as the stored unit instead.
+- When the integrations sub-module is picked up later, confirm Strava
+  remains the first/reference provider, with Apple Health & Google Fit as
+  follow-ups in the same sub-module.
