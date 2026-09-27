@@ -3,13 +3,18 @@ import { useRef, useState } from "react";
 import { Button, FlatList, SafeAreaView, Text, TextInput, View } from "react-native";
 
 import { createWorkout, searchExercises } from "@/modules/training_tracker/api";
-import type { Exercise, ExerciseSet, WorkoutType } from "@/modules/training_tracker/types";
+import type { Exercise, WorkoutExercise, WorkoutType } from "@/modules/training_tracker/types";
 
 const STRENGTH_TYPES: WorkoutType[] = ["strength", "calisthenics"];
 
+type DraftSet = {
+  reps: string;
+  weight_kg: string;
+};
+
 type DraftExercise = {
   exercise: Exercise;
-  sets: ExerciseSet[];
+  sets: DraftSet[];
 };
 
 export default function LogStrengthScreen() {
@@ -39,18 +44,18 @@ export default function LogStrengthScreen() {
   };
 
   const addExercise = (exercise: Exercise) => {
-    setDraftExercises((prev) => [...prev, { exercise, sets: [{ reps: 10 }] }]);
+    setDraftExercises((prev) => [...prev, { exercise, sets: [{ reps: "10", weight_kg: "" }] }]);
     setQuery("");
     setResults([]);
   };
 
   const addSet = (index: number) => {
     setDraftExercises((prev) =>
-      prev.map((d, i) => (i === index ? { ...d, sets: [...d.sets, { reps: 10 }] } : d))
+      prev.map((d, i) => (i === index ? { ...d, sets: [...d.sets, { reps: "10", weight_kg: "" }] } : d))
     );
   };
 
-  const updateSet = (exerciseIndex: number, setIndex: number, reps: number, weightKg?: number) => {
+  const updateSet = (exerciseIndex: number, setIndex: number, reps: string, weightKg: string) => {
     setDraftExercises((prev) =>
       prev.map((d, i) =>
         i === exerciseIndex
@@ -67,11 +72,18 @@ export default function LogStrengthScreen() {
       return;
     }
     try {
+      const exercises: WorkoutExercise[] = draftExercises.map((d) => ({
+        exercise_id: d.exercise.id,
+        sets: d.sets.map((s) => ({
+          reps: Number(s.reps) || 0,
+          weight_kg: s.weight_kg ? Number(s.weight_kg) : undefined,
+        })),
+      }));
       await createWorkout({
         type: workoutType,
         started_at: new Date().toISOString(),
         duration_s,
-        exercises: draftExercises.map((d) => ({ exercise_id: d.exercise.id, sets: d.sets })),
+        exercises,
       });
       router.back();
     } catch (err) {
@@ -125,15 +137,15 @@ export default function LogStrengthScreen() {
                 <TextInput
                   placeholder="reps"
                   keyboardType="numeric"
-                  value={String(set.reps)}
-                  onChangeText={(text) => updateSet(index, setIndex, Number(text) || 0, set.weight_kg)}
+                  value={set.reps}
+                  onChangeText={(text) => updateSet(index, setIndex, text, set.weight_kg)}
                   style={{ borderWidth: 1, padding: 8, borderRadius: 8, width: 60 }}
                 />
                 <TextInput
                   placeholder="kg"
                   keyboardType="numeric"
-                  value={set.weight_kg !== undefined ? String(set.weight_kg) : ""}
-                  onChangeText={(text) => updateSet(index, setIndex, set.reps, text ? Number(text) : undefined)}
+                  value={set.weight_kg}
+                  onChangeText={(text) => updateSet(index, setIndex, set.reps, text)}
                   style={{ borderWidth: 1, padding: 8, borderRadius: 8, width: 60 }}
                 />
               </View>

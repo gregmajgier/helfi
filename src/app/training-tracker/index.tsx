@@ -1,6 +1,6 @@
 import { useFocusEffect, useRouter, type Href } from "expo-router";
 import { useCallback, useState } from "react";
-import { Button, FlatList, SafeAreaView, Text, View } from "react-native";
+import { Alert, Button, FlatList, SafeAreaView, Text, View } from "react-native";
 
 import { deleteWorkout, listWorkouts } from "@/modules/training_tracker/api";
 import type { Workout } from "@/modules/training_tracker/types";
@@ -52,17 +52,31 @@ export default function TrainingTrackerRoute() {
         ListEmptyComponent={<Text>No workouts logged yet.</Text>}
         renderItem={({ item }) => (
           <View style={{ flexDirection: "row", justifyContent: "space-between", paddingVertical: 8 }}>
-            <Text>{summarize(item)}</Text>
+            <View>
+              <Text>{summarize(item)}</Text>
+              <Text>
+                {new Date(item.started_at).toLocaleDateString()} · {Math.round(item.duration_s / 60)} min
+              </Text>
+            </View>
             <Button
               title="Delete"
-              onPress={async () => {
-                try {
-                  await deleteWorkout(item.id);
-                  setError(null);
-                  load();
-                } catch (err) {
-                  setError(err instanceof Error ? err.message : "failed to delete workout");
-                }
+              onPress={() => {
+                Alert.alert("Delete workout?", "This can't be undone.", [
+                  { text: "Cancel", style: "cancel" },
+                  {
+                    text: "Delete",
+                    style: "destructive",
+                    onPress: async () => {
+                      try {
+                        await deleteWorkout(item.id);
+                        setError(null);
+                        load();
+                      } catch (err) {
+                        setError(err instanceof Error ? err.message : "failed to delete workout");
+                      }
+                    },
+                  },
+                ]);
               }}
             />
           </View>

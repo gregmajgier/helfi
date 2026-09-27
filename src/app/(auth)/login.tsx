@@ -15,7 +15,7 @@ export default function LoginScreen() {
     setError(null);
     try {
       await login(email, password);
-      router.replace("/meal-tracker" as Href);
+      router.replace("/" as Href);
     } catch (err) {
       setError(err instanceof Error ? err.message : "login failed");
     }

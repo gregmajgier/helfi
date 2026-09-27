@@ -19,7 +19,7 @@ export default function RegisterScreen() {
     }
     try {
       await register(email, password);
-      router.replace("/meal-tracker" as Href);
+      router.replace("/" as Href);
     } catch (err) {
       setError(err instanceof Error ? err.message : "registration failed");
     }
