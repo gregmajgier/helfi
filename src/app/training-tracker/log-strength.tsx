@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Button, FlatList, SafeAreaView, Text, TextInput, View } from "react-native";
 
 import { createWorkout, searchExercises } from "@/modules/training_tracker/api";
@@ -20,14 +20,21 @@ export default function LogStrengthScreen() {
   const [results, setResults] = useState<Exercise[]>([]);
   const [draftExercises, setDraftExercises] = useState<DraftExercise[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const searchSeq = useRef(0);
 
   const onSearch = async (text: string) => {
     setQuery(text);
+    const seq = ++searchSeq.current;
     try {
-      setResults(text.length >= 2 ? await searchExercises(text) : []);
-      setError(null);
+      const found = text.length >= 2 ? await searchExercises(text) : [];
+      if (seq === searchSeq.current) {
+        setResults(found);
+        setError(null);
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "search failed");
+      if (seq === searchSeq.current) {
+        setError(err instanceof Error ? err.message : "search failed");
+      }
     }
   };
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Button, FlatList, SafeAreaView, Text, TextInput } from "react-native";
 
 import { createExercise, searchExercises } from "@/modules/training_tracker/api";
@@ -10,14 +10,21 @@ export default function ExerciseLibraryScreen() {
   const [newName, setNewName] = useState("");
   const [newCategory, setNewCategory] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const searchSeq = useRef(0);
 
   const onSearch = async (text: string) => {
     setQuery(text);
+    const seq = ++searchSeq.current;
     try {
-      setResults(text.length >= 2 ? await searchExercises(text) : []);
-      setError(null);
+      const found = text.length >= 2 ? await searchExercises(text) : [];
+      if (seq === searchSeq.current) {
+        setResults(found);
+        setError(null);
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "search failed");
+      if (seq === searchSeq.current) {
+        setError(err instanceof Error ? err.message : "search failed");
+      }
     }
   };
 
