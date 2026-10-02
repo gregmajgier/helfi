@@ -4,7 +4,9 @@ from unittest.mock import AsyncMock, MagicMock
 from app.db.cosmos import (
     CosmosExerciseRepository,
     CosmosFoodRepository,
+    CosmosJournalEntryRepository,
     CosmosMealEntryRepository,
+    CosmosMoodEntryRepository,
     CosmosUserRepository,
     CosmosWorkoutRepository,
 )
@@ -114,3 +116,49 @@ async def test_exercise_repository_create_assigns_id():
 
     assert record["id"]
     container.create_item.assert_awaited_once_with(record)
+
+
+async def test_mood_entry_repository_list_for_user_queries_by_partition_key_and_range():
+    container = MagicMock()
+
+    async def fake_query_items(query, parameters, partition_key):
+        assert partition_key == "user-1"
+        assert "c.logged_at >= @start" in query
+        for item in [{"id": "m1", "user_id": "user-1", "logged_at": "2026-10-05T08:00:00", "mood_score": 5}]:
+            yield item
+
+    container.query_items = fake_query_items
+    repo = CosmosMoodEntryRepository(_client_with_container(container), "health_app")
+
+    from datetime import date
+
+    entries = await repo.list_for_user("user-1", start=date(2026, 10, 1))
+
+    assert [e["id"] for e in entries] == ["m1"]
+
+
+async def test_mood_entry_repository_create_assigns_id():
+    container = MagicMock()
+    container.create_item = AsyncMock()
+    repo = CosmosMoodEntryRepository(_client_with_container(container), "health_app")
+
+    record = await repo.create({"user_id": "user-1", "logged_at": "2026-10-01T08:00:00", "mood_score": 3, "tags": []})
+
+    assert record["id"]
+    container.create_item.assert_awaited_once_with(record)
+
+
+async def test_journal_entry_repository_list_for_user_queries_by_partition_key():
+    container = MagicMock()
+
+    async def fake_query_items(query, parameters, partition_key):
+        assert partition_key == "user-1"
+        for item in [{"id": "j1", "user_id": "user-1", "written_at": "2026-10-01T08:00:00", "body": "hi"}]:
+            yield item
+
+    container.query_items = fake_query_items
+    repo = CosmosJournalEntryRepository(_client_with_container(container), "health_app")
+
+    entries = await repo.list_for_user("user-1")
+
+    assert [e["id"] for e in entries] == ["j1"]

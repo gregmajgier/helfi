@@ -35,6 +35,12 @@ async def init_cosmos(client: CosmosClient, database_name: str) -> None:
         id="workouts", partition_key=PartitionKey(path="/user_id")
     )
     await database.create_container_if_not_exists(id="exercises", partition_key=PartitionKey(path="/id"))
+    await database.create_container_if_not_exists(
+        id="mood_entries", partition_key=PartitionKey(path="/user_id")
+    )
+    await database.create_container_if_not_exists(
+        id="journal_entries", partition_key=PartitionKey(path="/user_id")
+    )
 
 
 class CosmosUserRepository:
@@ -223,3 +229,109 @@ class CosmosExerciseRepository:
         record = {**exercise, "id": str(uuid.uuid4())}
         await container.create_item(record)
         return record
+
+
+class CosmosMoodEntryRepository:
+    def __init__(self, client: CosmosClient, database_name: str):
+        self._client = client
+        self._database_name = database_name
+
+    def _container(self):
+        return self._client.get_database_client(self._database_name).get_container_client("mood_entries")
+
+    async def create(self, entry: dict) -> dict:
+        container = self._container()
+        now = datetime.now(timezone.utc).isoformat()
+        record = {**entry, "id": str(uuid.uuid4()), "created_at": now, "updated_at": now}
+        await container.create_item(record)
+        return record
+
+    async def list_for_user(
+        self, user_id: str, start: Optional[date] = None, end: Optional[date] = None
+    ) -> list[dict]:
+        container = self._container()
+        query = "SELECT * FROM c WHERE c.user_id = @user_id"
+        params = [{"name": "@user_id", "value": user_id}]
+        if start is not None:
+            query += " AND c.logged_at >= @start"
+            params.append({"name": "@start", "value": start.isoformat()})
+        if end is not None:
+            query += " AND c.logged_at <= @end"
+            params.append({"name": "@end", "value": f"{end.isoformat()}T23:59:59"})
+        items = [
+            item
+            async for item in container.query_items(query=query, parameters=params, partition_key=user_id)
+        ]
+        return sorted(items, key=lambda e: e["logged_at"], reverse=True)
+
+    async def get(self, user_id: str, entry_id: str) -> Optional[dict]:
+        container = self._container()
+        try:
+            return await container.read_item(item=entry_id, partition_key=user_id)
+        except Exception:
+            return None
+
+    async def update(self, user_id: str, entry_id: str, updates: dict) -> Optional[dict]:
+        entry = await self.get(user_id, entry_id)
+        if not entry:
+            return None
+        entry.update(updates)
+        entry["updated_at"] = datetime.now(timezone.utc).isoformat()
+        await self._container().replace_item(item=entry_id, body=entry)
+        return entry
+
+    async def delete(self, user_id: str, entry_id: str) -> bool:
+        entry = await self.get(user_id, entry_id)
+        if not entry:
+            return False
+        await self._container().delete_item(item=entry_id, partition_key=user_id)
+        return True
+
+
+class CosmosJournalEntryRepository:
+    def __init__(self, client: CosmosClient, database_name: str):
+        self._client = client
+        self._database_name = database_name
+
+    def _container(self):
+        return self._client.get_database_client(self._database_name).get_container_client("journal_entries")
+
+    async def create(self, entry: dict) -> dict:
+        container = self._container()
+        now = datetime.now(timezone.utc).isoformat()
+        record = {**entry, "id": str(uuid.uuid4()), "created_at": now, "updated_at": now}
+        await container.create_item(record)
+        return record
+
+    async def list_for_user(self, user_id: str) -> list[dict]:
+        container = self._container()
+        query = "SELECT * FROM c WHERE c.user_id = @user_id"
+        params = [{"name": "@user_id", "value": user_id}]
+        items = [
+            item
+            async for item in container.query_items(query=query, parameters=params, partition_key=user_id)
+        ]
+        return sorted(items, key=lambda e: e["written_at"], reverse=True)
+
+    async def get(self, user_id: str, entry_id: str) -> Optional[dict]:
+        container = self._container()
+        try:
+            return await container.read_item(item=entry_id, partition_key=user_id)
+        except Exception:
+            return None
+
+    async def update(self, user_id: str, entry_id: str, updates: dict) -> Optional[dict]:
+        entry = await self.get(user_id, entry_id)
+        if not entry:
+            return None
+        entry.update(updates)
+        entry["updated_at"] = datetime.now(timezone.utc).isoformat()
+        await self._container().replace_item(item=entry_id, body=entry)
+        return entry
+
+    async def delete(self, user_id: str, entry_id: str) -> bool:
+        entry = await self.get(user_id, entry_id)
+        if not entry:
+            return False
+        await self._container().delete_item(item=entry_id, partition_key=user_id)
+        return True

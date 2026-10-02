@@ -5,7 +5,9 @@ from .config import settings
 from .db.cosmos import (
     CosmosExerciseRepository,
     CosmosFoodRepository,
+    CosmosJournalEntryRepository,
     CosmosMealEntryRepository,
+    CosmosMoodEntryRepository,
     CosmosUserRepository,
     CosmosWorkoutRepository,
     get_cosmos_client,
@@ -65,10 +67,14 @@ def get_exercise_repo():
 
 
 def get_mood_entry_repo():
+    if settings.db_backend == "cosmos":
+        return CosmosMoodEntryRepository(get_cosmos_client(), settings.cosmos_database_name)
     return _memory_mood_entry_repo
 
 
 def get_journal_entry_repo():
+    if settings.db_backend == "cosmos":
+        return CosmosJournalEntryRepository(get_cosmos_client(), settings.cosmos_database_name)
     return _memory_journal_entry_repo
 
 
