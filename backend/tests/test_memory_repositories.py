@@ -5,7 +5,9 @@ from app.db.memory import (
     SEED_FOODS,
     InMemoryExerciseRepository,
     InMemoryFoodRepository,
+    InMemoryJournalEntryRepository,
     InMemoryMealEntryRepository,
+    InMemoryMoodEntryRepository,
     InMemoryUserRepository,
     InMemoryWorkoutRepository,
 )
@@ -118,3 +120,57 @@ async def test_exercise_repository_search_and_create():
     assert created["id"]
     found = await repo.search("cable")
     assert any(e["id"] == created["id"] for e in found)
+
+
+async def test_mood_entry_repository_crud_scoped_by_user():
+    repo = InMemoryMoodEntryRepository()
+
+    entry = await repo.create(
+        {"user_id": "user-1", "logged_at": "2026-10-01T08:00:00+00:00", "mood_score": 4, "tags": ["calm"]}
+    )
+
+    assert entry["id"]
+    mine = await repo.list_for_user("user-1")
+    assert [e["id"] for e in mine] == [entry["id"]]
+    assert await repo.list_for_user("user-2") == []
+
+    updated = await repo.update("user-1", entry["id"], {"mood_score": 5})
+    assert updated["mood_score"] == 5
+    assert await repo.update("user-2", entry["id"], {"mood_score": 1}) is None
+
+    assert await repo.delete("user-2", entry["id"]) is False
+    assert await repo.delete("user-1", entry["id"]) is True
+    assert await repo.get("user-1", entry["id"]) is None
+
+
+async def test_mood_entry_repository_list_for_user_filters_by_date_range():
+    repo = InMemoryMoodEntryRepository()
+    await repo.create({"user_id": "user-1", "logged_at": "2026-10-01T08:00:00+00:00", "mood_score": 3, "tags": []})
+    await repo.create({"user_id": "user-1", "logged_at": "2026-10-05T08:00:00+00:00", "mood_score": 5, "tags": []})
+
+    from datetime import date as date_cls
+
+    in_range = await repo.list_for_user("user-1", start=date_cls(2026, 10, 2), end=date_cls(2026, 10, 10))
+
+    assert [e["mood_score"] for e in in_range] == [5]
+
+
+async def test_journal_entry_repository_crud_scoped_by_user():
+    repo = InMemoryJournalEntryRepository()
+
+    entry = await repo.create(
+        {"user_id": "user-1", "written_at": "2026-10-01T08:00:00+00:00", "body": "Today was fine."}
+    )
+
+    assert entry["id"]
+    mine = await repo.list_for_user("user-1")
+    assert [e["id"] for e in mine] == [entry["id"]]
+    assert await repo.list_for_user("user-2") == []
+
+    updated = await repo.update("user-1", entry["id"], {"body": "Updated."})
+    assert updated["body"] == "Updated."
+    assert await repo.update("user-2", entry["id"], {"body": "nope"}) is None
+
+    assert await repo.delete("user-2", entry["id"]) is False
+    assert await repo.delete("user-1", entry["id"]) is True
+    assert await repo.get("user-1", entry["id"]) is None

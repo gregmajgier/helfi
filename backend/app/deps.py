@@ -15,7 +15,9 @@ from .db.memory import (
     SEED_FOODS,
     InMemoryExerciseRepository,
     InMemoryFoodRepository,
+    InMemoryJournalEntryRepository,
     InMemoryMealEntryRepository,
+    InMemoryMoodEntryRepository,
     InMemoryUserRepository,
     InMemoryWorkoutRepository,
 )
@@ -28,6 +30,8 @@ _memory_meal_entry_repo = InMemoryMealEntryRepository()
 _food_repo = InMemoryFoodRepository(SEED_FOODS)
 _memory_workout_repo = InMemoryWorkoutRepository()
 _exercise_repo = InMemoryExerciseRepository(SEED_EXERCISES)
+_memory_mood_entry_repo = InMemoryMoodEntryRepository()
+_memory_journal_entry_repo = InMemoryJournalEntryRepository()
 
 
 def get_user_repo():
@@ -58,6 +62,14 @@ def get_exercise_repo():
     if settings.db_backend == "cosmos":
         return CosmosExerciseRepository(get_cosmos_client(), settings.cosmos_database_name)
     return _exercise_repo
+
+
+def get_mood_entry_repo():
+    return _memory_mood_entry_repo
+
+
+def get_journal_entry_repo():
+    return _memory_journal_entry_repo
 
 
 async def get_current_user_id(

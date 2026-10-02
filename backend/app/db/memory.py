@@ -168,3 +168,79 @@ SEED_EXERCISES: list[dict] = [
     {"id": "plank", "name": "Plank", "category": "core", "is_bodyweight": True, "created_by_user_id": None},
     {"id": "lunge", "name": "Lunge", "category": "legs", "is_bodyweight": True, "created_by_user_id": None},
 ]
+
+
+class InMemoryMoodEntryRepository:
+    def __init__(self):
+        self._entries: dict[str, dict] = {}
+
+    async def create(self, entry: dict) -> dict:
+        entry_id = str(uuid.uuid4())
+        now = datetime.now(timezone.utc).isoformat()
+        record = {**entry, "id": entry_id, "created_at": now, "updated_at": now}
+        self._entries[entry_id] = record
+        return record
+
+    async def list_for_user(
+        self, user_id: str, start: Optional[date] = None, end: Optional[date] = None
+    ) -> list[dict]:
+        results = [e for e in self._entries.values() if e["user_id"] == user_id]
+        if start is not None:
+            results = [e for e in results if e["logged_at"] >= start.isoformat()]
+        if end is not None:
+            results = [e for e in results if e["logged_at"] <= f"{end.isoformat()}T23:59:59"]
+        return sorted(results, key=lambda e: e["logged_at"], reverse=True)
+
+    async def get(self, user_id: str, entry_id: str) -> Optional[dict]:
+        entry = self._entries.get(entry_id)
+        return entry if entry and entry["user_id"] == user_id else None
+
+    async def update(self, user_id: str, entry_id: str, updates: dict) -> Optional[dict]:
+        entry = await self.get(user_id, entry_id)
+        if not entry:
+            return None
+        entry.update(updates)
+        entry["updated_at"] = datetime.now(timezone.utc).isoformat()
+        return entry
+
+    async def delete(self, user_id: str, entry_id: str) -> bool:
+        entry = await self.get(user_id, entry_id)
+        if not entry:
+            return False
+        del self._entries[entry["id"]]
+        return True
+
+
+class InMemoryJournalEntryRepository:
+    def __init__(self):
+        self._entries: dict[str, dict] = {}
+
+    async def create(self, entry: dict) -> dict:
+        entry_id = str(uuid.uuid4())
+        now = datetime.now(timezone.utc).isoformat()
+        record = {**entry, "id": entry_id, "created_at": now, "updated_at": now}
+        self._entries[entry_id] = record
+        return record
+
+    async def list_for_user(self, user_id: str) -> list[dict]:
+        results = [e for e in self._entries.values() if e["user_id"] == user_id]
+        return sorted(results, key=lambda e: e["written_at"], reverse=True)
+
+    async def get(self, user_id: str, entry_id: str) -> Optional[dict]:
+        entry = self._entries.get(entry_id)
+        return entry if entry and entry["user_id"] == user_id else None
+
+    async def update(self, user_id: str, entry_id: str, updates: dict) -> Optional[dict]:
+        entry = await self.get(user_id, entry_id)
+        if not entry:
+            return None
+        entry.update(updates)
+        entry["updated_at"] = datetime.now(timezone.utc).isoformat()
+        return entry
+
+    async def delete(self, user_id: str, entry_id: str) -> bool:
+        entry = await self.get(user_id, entry_id)
+        if not entry:
+            return False
+        del self._entries[entry["id"]]
+        return True

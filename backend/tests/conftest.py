@@ -12,7 +12,9 @@ from app.db.memory import (
     SEED_FOODS,
     InMemoryExerciseRepository,
     InMemoryFoodRepository,
+    InMemoryJournalEntryRepository,
     InMemoryMealEntryRepository,
+    InMemoryMoodEntryRepository,
     InMemoryUserRepository,
     InMemoryWorkoutRepository,
 )
@@ -26,12 +28,16 @@ def client():
     food_repo = InMemoryFoodRepository(SEED_FOODS)
     workout_repo = InMemoryWorkoutRepository()
     exercise_repo = InMemoryExerciseRepository(SEED_EXERCISES)
+    mood_entry_repo = InMemoryMoodEntryRepository()
+    journal_entry_repo = InMemoryJournalEntryRepository()
 
     app.dependency_overrides[deps.get_user_repo] = lambda: user_repo
     app.dependency_overrides[deps.get_meal_entry_repo] = lambda: meal_entry_repo
     app.dependency_overrides[deps.get_food_repo] = lambda: food_repo
     app.dependency_overrides[deps.get_workout_repo] = lambda: workout_repo
     app.dependency_overrides[deps.get_exercise_repo] = lambda: exercise_repo
+    app.dependency_overrides[deps.get_mood_entry_repo] = lambda: mood_entry_repo
+    app.dependency_overrides[deps.get_journal_entry_repo] = lambda: journal_entry_repo
 
     with TestClient(app) as test_client:
         yield test_client
