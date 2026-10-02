@@ -135,25 +135,26 @@ that redirect — while unresolved, render nothing (same pattern as the
 existing `isLoading` check); if `false`/unset, redirect to `/onboarding`
 instead of `/login`.
 
-## Hub becomes a tab bar, not a tile dashboard
+## Hub becomes a tile dashboard
 
-Elaborating on "hub redesign" beyond what was discussed in chat: a bottom tab
-bar fits better than a dashboard of tiles pushing into a back-stack, because
-it keeps all four pillar colors visible throughout use (the whole point of
-having four colors), not just on one entry screen.
+`src/app/index.tsx` is rebuilt as a "Today" dashboard: four colored cards,
+one per pillar (Move / Fuel / Mind / Focus), each tinted its pillar color
+and showing a quick status line — this week's workout count vs. the local
+goal, today's meals logged, last Mind check-in, count of active Focus rules.
+Tapping a card pushes into that module's existing route
+(`/training-tracker`, `/meal-tracker`, `/mental-health`, `/digital-health`);
+back returns to Today. No tab bar, no restructuring of the existing
+`training-tracker`/`meal-tracker` routes into an expo-router tab group —
+they keep their current top-level paths.
 
-Five tabs: **Today** (neutral icon, no pillar color — aggregates a quick
-status line per pillar: this week's workout count vs. goal, today's meals
-logged, last mood check-in, active Focus rules) is the default landing tab;
-then **Move / Fuel / Mind / Focus**, each tab icon tinted its pillar color
-when active, grey when inactive. Existing route folders
-(`training-tracker`, `meal-tracker`) are nested under the tab group as-is;
-exact folder restructuring (which needs an expo-router `(tabs)` group) is
-left to the implementation plan rather than pinned down here.
+Each pillar's own screens (headers, primary buttons, progress indicators)
+carry that pillar's accent color so the identity doesn't disappear once the
+user taps past Today — persistence of color comes from consistent accenting
+within each module, not from a persistent nav bar.
 
-Log out moves into a small account icon in the Today tab's header rather
-than a standing visible button — a dedicated settings/profile screen is out
-of scope this phase.
+Log out moves into a small account icon in the Today header rather than a
+standing visible button — a dedicated settings/profile screen is out of
+scope this phase.
 
 ## Mental Health (Mind) — building the existing spec, unchanged
 
