@@ -10,6 +10,7 @@ from .config import settings, validate_production_settings
 from .db.cosmos import close_cosmos_client, get_cosmos_client, init_cosmos
 from .meals.router import router as meals_router
 from .mood.router import router as mood_router
+from .screentime.router import router as screentime_router
 from .workouts.router import router as workouts_router
 
 
@@ -53,6 +54,7 @@ app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(meals_router, prefix="/meals", tags=["meals"])
 app.include_router(workouts_router, prefix="/workouts", tags=["workouts"])
 app.include_router(mood_router, prefix="/mood", tags=["mood"])
+app.include_router(screentime_router, prefix="/screentime", tags=["screentime"])
 
 
 @app.get("/health")
