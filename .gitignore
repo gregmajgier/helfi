@@ -35,6 +35,9 @@ yarn-error.*
 .env
 backend/.env
 
+# azd environment state (subscription IDs, generated secrets)
+.azure/
+
 # Python
 __pycache__/
 *.pyc
