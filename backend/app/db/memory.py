@@ -244,3 +244,38 @@ class InMemoryJournalEntryRepository:
             return False
         del self._entries[entry["id"]]
         return True
+
+
+class InMemoryScreenTimeRuleRepository:
+    def __init__(self):
+        self._rules: dict[str, dict] = {}
+
+    async def create(self, rule: dict) -> dict:
+        rule_id = str(uuid.uuid4())
+        now = datetime.now(timezone.utc).isoformat()
+        record = {**rule, "id": rule_id, "created_at": now, "updated_at": now}
+        self._rules[rule_id] = record
+        return record
+
+    async def list_for_user(self, user_id: str) -> list[dict]:
+        results = [r for r in self._rules.values() if r["user_id"] == user_id]
+        return sorted(results, key=lambda r: r["created_at"], reverse=True)
+
+    async def get(self, user_id: str, rule_id: str) -> Optional[dict]:
+        rule = self._rules.get(rule_id)
+        return rule if rule and rule["user_id"] == user_id else None
+
+    async def update(self, user_id: str, rule_id: str, updates: dict) -> Optional[dict]:
+        rule = await self.get(user_id, rule_id)
+        if not rule:
+            return None
+        rule.update(updates)
+        rule["updated_at"] = datetime.now(timezone.utc).isoformat()
+        return rule
+
+    async def delete(self, user_id: str, rule_id: str) -> bool:
+        rule = await self.get(user_id, rule_id)
+        if not rule:
+            return False
+        del self._rules[rule["id"]]
+        return True

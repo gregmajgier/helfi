@@ -15,6 +15,7 @@ from app.db.memory import (
     InMemoryJournalEntryRepository,
     InMemoryMealEntryRepository,
     InMemoryMoodEntryRepository,
+    InMemoryScreenTimeRuleRepository,
     InMemoryUserRepository,
     InMemoryWorkoutRepository,
 )
@@ -30,6 +31,7 @@ def client():
     exercise_repo = InMemoryExerciseRepository(SEED_EXERCISES)
     mood_entry_repo = InMemoryMoodEntryRepository()
     journal_entry_repo = InMemoryJournalEntryRepository()
+    screentime_rule_repo = InMemoryScreenTimeRuleRepository()
 
     app.dependency_overrides[deps.get_user_repo] = lambda: user_repo
     app.dependency_overrides[deps.get_meal_entry_repo] = lambda: meal_entry_repo
@@ -38,6 +40,7 @@ def client():
     app.dependency_overrides[deps.get_exercise_repo] = lambda: exercise_repo
     app.dependency_overrides[deps.get_mood_entry_repo] = lambda: mood_entry_repo
     app.dependency_overrides[deps.get_journal_entry_repo] = lambda: journal_entry_repo
+    app.dependency_overrides[deps.get_screentime_rule_repo] = lambda: screentime_rule_repo
 
     with TestClient(app) as test_client:
         yield test_client

@@ -20,6 +20,7 @@ from .db.memory import (
     InMemoryJournalEntryRepository,
     InMemoryMealEntryRepository,
     InMemoryMoodEntryRepository,
+    InMemoryScreenTimeRuleRepository,
     InMemoryUserRepository,
     InMemoryWorkoutRepository,
 )
@@ -34,6 +35,7 @@ _memory_workout_repo = InMemoryWorkoutRepository()
 _exercise_repo = InMemoryExerciseRepository(SEED_EXERCISES)
 _memory_mood_entry_repo = InMemoryMoodEntryRepository()
 _memory_journal_entry_repo = InMemoryJournalEntryRepository()
+_memory_screentime_rule_repo = InMemoryScreenTimeRuleRepository()
 
 
 def get_user_repo():
@@ -76,6 +78,10 @@ def get_journal_entry_repo():
     if settings.db_backend == "cosmos":
         return CosmosJournalEntryRepository(get_cosmos_client(), settings.cosmos_database_name)
     return _memory_journal_entry_repo
+
+
+def get_screentime_rule_repo():
+    return _memory_screentime_rule_repo
 
 
 async def get_current_user_id(

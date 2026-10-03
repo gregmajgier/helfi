@@ -8,6 +8,7 @@ from app.db.memory import (
     InMemoryJournalEntryRepository,
     InMemoryMealEntryRepository,
     InMemoryMoodEntryRepository,
+    InMemoryScreenTimeRuleRepository,
     InMemoryUserRepository,
     InMemoryWorkoutRepository,
 )
@@ -174,3 +175,24 @@ async def test_journal_entry_repository_crud_scoped_by_user():
     assert await repo.delete("user-2", entry["id"]) is False
     assert await repo.delete("user-1", entry["id"]) is True
     assert await repo.get("user-1", entry["id"]) is None
+
+
+async def test_screentime_rule_repository_crud_scoped_by_user():
+    repo = InMemoryScreenTimeRuleRepository()
+
+    rule = await repo.create(
+        {"user_id": "user-1", "name": "Evening wind-down", "apps_or_categories": ["social"], "enabled": True}
+    )
+
+    assert rule["id"]
+    mine = await repo.list_for_user("user-1")
+    assert [r["id"] for r in mine] == [rule["id"]]
+    assert await repo.list_for_user("user-2") == []
+
+    updated = await repo.update("user-1", rule["id"], {"enabled": False})
+    assert updated["enabled"] is False
+    assert await repo.update("user-2", rule["id"], {"enabled": True}) is None
+
+    assert await repo.delete("user-2", rule["id"]) is False
+    assert await repo.delete("user-1", rule["id"]) is True
+    assert await repo.get("user-1", rule["id"]) is None
