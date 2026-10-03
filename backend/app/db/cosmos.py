@@ -41,6 +41,9 @@ async def init_cosmos(client: CosmosClient, database_name: str) -> None:
     await database.create_container_if_not_exists(
         id="journal_entries", partition_key=PartitionKey(path="/user_id")
     )
+    await database.create_container_if_not_exists(
+        id="screentime_rules", partition_key=PartitionKey(path="/user_id")
+    )
 
 
 class CosmosUserRepository:
@@ -334,4 +337,53 @@ class CosmosJournalEntryRepository:
         if not entry:
             return False
         await self._container().delete_item(item=entry_id, partition_key=user_id)
+        return True
+
+
+class CosmosScreenTimeRuleRepository:
+    def __init__(self, client: CosmosClient, database_name: str):
+        self._client = client
+        self._database_name = database_name
+
+    def _container(self):
+        return self._client.get_database_client(self._database_name).get_container_client("screentime_rules")
+
+    async def create(self, rule: dict) -> dict:
+        container = self._container()
+        now = datetime.now(timezone.utc).isoformat()
+        record = {**rule, "id": str(uuid.uuid4()), "created_at": now, "updated_at": now}
+        await container.create_item(record)
+        return record
+
+    async def list_for_user(self, user_id: str) -> list[dict]:
+        container = self._container()
+        query = "SELECT * FROM c WHERE c.user_id = @user_id"
+        params = [{"name": "@user_id", "value": user_id}]
+        items = [
+            item
+            async for item in container.query_items(query=query, parameters=params, partition_key=user_id)
+        ]
+        return sorted(items, key=lambda r: r["created_at"], reverse=True)
+
+    async def get(self, user_id: str, rule_id: str) -> Optional[dict]:
+        container = self._container()
+        try:
+            return await container.read_item(item=rule_id, partition_key=user_id)
+        except Exception:
+            return None
+
+    async def update(self, user_id: str, rule_id: str, updates: dict) -> Optional[dict]:
+        rule = await self.get(user_id, rule_id)
+        if not rule:
+            return None
+        rule.update(updates)
+        rule["updated_at"] = datetime.now(timezone.utc).isoformat()
+        await self._container().replace_item(item=rule_id, body=rule)
+        return rule
+
+    async def delete(self, user_id: str, rule_id: str) -> bool:
+        rule = await self.get(user_id, rule_id)
+        if not rule:
+            return False
+        await self._container().delete_item(item=rule_id, partition_key=user_id)
         return True

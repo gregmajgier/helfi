@@ -7,6 +7,7 @@ from app.db.cosmos import (
     CosmosJournalEntryRepository,
     CosmosMealEntryRepository,
     CosmosMoodEntryRepository,
+    CosmosScreenTimeRuleRepository,
     CosmosUserRepository,
     CosmosWorkoutRepository,
 )
@@ -162,3 +163,32 @@ async def test_journal_entry_repository_list_for_user_queries_by_partition_key()
     entries = await repo.list_for_user("user-1")
 
     assert [e["id"] for e in entries] == ["j1"]
+
+
+async def test_screentime_rule_repository_list_for_user_queries_by_partition_key():
+    container = MagicMock()
+
+    async def fake_query_items(query, parameters, partition_key):
+        assert partition_key == "user-1"
+        for item in [{"id": "r1", "user_id": "user-1", "name": "Wind-down", "created_at": "2026-10-01T08:00:00"}]:
+            yield item
+
+    container.query_items = fake_query_items
+    repo = CosmosScreenTimeRuleRepository(_client_with_container(container), "health_app")
+
+    rules = await repo.list_for_user("user-1")
+
+    assert [r["id"] for r in rules] == ["r1"]
+
+
+async def test_screentime_rule_repository_create_assigns_id():
+    container = MagicMock()
+    container.create_item = AsyncMock()
+    repo = CosmosScreenTimeRuleRepository(_client_with_container(container), "health_app")
+
+    record = await repo.create(
+        {"user_id": "user-1", "name": "Wind-down", "apps_or_categories": ["social"], "enabled": True}
+    )
+
+    assert record["id"]
+    container.create_item.assert_awaited_once_with(record)

@@ -8,6 +8,7 @@ from .db.cosmos import (
     CosmosJournalEntryRepository,
     CosmosMealEntryRepository,
     CosmosMoodEntryRepository,
+    CosmosScreenTimeRuleRepository,
     CosmosUserRepository,
     CosmosWorkoutRepository,
     get_cosmos_client,
@@ -81,6 +82,8 @@ def get_journal_entry_repo():
 
 
 def get_screentime_rule_repo():
+    if settings.db_backend == "cosmos":
+        return CosmosScreenTimeRuleRepository(get_cosmos_client(), settings.cosmos_database_name)
     return _memory_screentime_rule_repo
 
 
