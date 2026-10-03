@@ -1,6 +1,6 @@
 import { useFocusEffect, useRouter, type Href } from "expo-router";
 import { useCallback, useState } from "react";
-import { Alert, Text, View } from "react-native";
+import { Alert, ScrollView, Text, View } from "react-native";
 
 import { Button, Card, ScreenContainer } from "@/components";
 import { useTheme } from "@/lib/theme";
@@ -9,7 +9,7 @@ import type { ScreenTimeRule } from "@/modules/digital_health/types";
 
 export default function DigitalHealthRoute() {
   const router = useRouter();
-  const { colors, pillars, font } = useTheme();
+  const { colors, pillars, font, spacing } = useTheme();
   const accent = pillars.focus.light;
   const [rules, setRules] = useState<ScreenTimeRule[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -62,49 +62,51 @@ export default function DigitalHealthRoute() {
 
   return (
     <ScreenContainer>
-      <Text style={{ fontFamily: font.extrabold, fontSize: 24, color: colors.textPrimary }}>Focus</Text>
-      {error ? <Text style={{ color: "#C0392B" }}>{error}</Text> : null}
+      <ScrollView contentContainerStyle={{ gap: spacing.md }}>
+        <Text style={{ fontFamily: font.extrabold, fontSize: 24, color: colors.textPrimary }}>Focus</Text>
+        {error ? <Text style={{ color: "#C0392B" }}>{error}</Text> : null}
 
-      <Card style={{ borderColor: accent, borderWidth: 1.5 }}>
-        <Text style={{ fontFamily: font.semibold, fontSize: 14, color: colors.textPrimary }}>
-          Enforcement coming soon
-        </Text>
-        <Text style={{ fontFamily: font.regular, fontSize: 13, color: colors.textSecondary }}>
-          You can set up rules now. Actually blocking apps on a schedule needs a deeper platform
-          integration we haven't shipped yet — your rules are saved and ready for when it lands.
-        </Text>
-      </Card>
+        <Card style={{ borderColor: accent, borderWidth: 1.5 }}>
+          <Text style={{ fontFamily: font.semibold, fontSize: 14, color: colors.textPrimary }}>
+            Enforcement coming soon
+          </Text>
+          <Text style={{ fontFamily: font.regular, fontSize: 13, color: colors.textSecondary }}>
+            You can set up rules now. Actually blocking apps on a schedule needs a deeper platform
+            integration we haven't shipped yet — your rules are saved and ready for when it lands.
+          </Text>
+        </Card>
 
-      {isLoading ? null : rules.length === 0 ? (
-        <Text style={{ color: colors.textSecondary }}>No rules yet.</Text>
-      ) : (
-        rules.map((rule) => (
-          <Card key={rule.id}>
-            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-              <Text style={{ fontFamily: font.semibold, fontSize: 15, color: colors.textPrimary }}>
-                {rule.name}
+        {isLoading ? null : rules.length === 0 ? (
+          <Text style={{ color: colors.textSecondary }}>No rules yet.</Text>
+        ) : (
+          rules.map((rule) => (
+            <Card key={rule.id}>
+              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                <Text style={{ fontFamily: font.semibold, fontSize: 15, color: colors.textPrimary }}>
+                  {rule.name}
+                </Text>
+                <Button
+                  title={rule.enabled ? "Enabled" : "Disabled"}
+                  variant={rule.enabled ? "primary" : "secondary"}
+                  color={accent}
+                  onPress={() => toggleRule(rule)}
+                />
+              </View>
+              <Text style={{ fontFamily: font.regular, fontSize: 13, color: colors.textSecondary }}>
+                {rule.apps_or_categories.join(", ")}
+                {rule.daily_limit_minutes ? ` · ${rule.daily_limit_minutes} min/day` : ""}
               </Text>
-              <Button
-                title={rule.enabled ? "Enabled" : "Disabled"}
-                variant={rule.enabled ? "primary" : "secondary"}
-                color={accent}
-                onPress={() => toggleRule(rule)}
-              />
-            </View>
-            <Text style={{ fontFamily: font.regular, fontSize: 13, color: colors.textSecondary }}>
-              {rule.apps_or_categories.join(", ")}
-              {rule.daily_limit_minutes ? ` · ${rule.daily_limit_minutes} min/day` : ""}
-            </Text>
-            <Button title="Delete" variant="text" color="#C0392B" onPress={() => removeRule(rule)} />
-          </Card>
-        ))
-      )}
+              <Button title="Delete" variant="text" color="#C0392B" onPress={() => removeRule(rule)} />
+            </Card>
+          ))
+        )}
 
-      <Button
-        title="Add rule"
-        color={accent}
-        onPress={() => router.push("/digital-health/rule-builder" as Href)}
-      />
+        <Button
+          title="Add rule"
+          color={accent}
+          onPress={() => router.push("/digital-health/rule-builder" as Href)}
+        />
+      </ScrollView>
     </ScreenContainer>
   );
 }

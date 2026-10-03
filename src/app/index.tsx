@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth-context";
 import { getMoveGoalPerWeek, isOnboardingComplete } from "@/lib/onboarding-store";
 import { useTheme } from "@/lib/theme";
 import { listScreenTimeRules } from "@/modules/digital_health/api";
+import { listEntriesForDay } from "@/modules/meal_tracker/api";
 import { listMoodEntries } from "@/modules/mental_health/api";
 import { listWorkouts } from "@/modules/training_tracker/api";
 
@@ -14,10 +15,14 @@ type Statuses = { move: string; fuel: string; mind: string; focus: string };
 
 const INITIAL_STATUSES: Statuses = {
   move: "Loading...",
-  fuel: "Log today's meals",
+  fuel: "Loading...",
   mind: "Loading...",
   focus: "Loading...",
 };
+
+function todayIsoDate(): string {
+  return new Date().toISOString().slice(0, 10);
+}
 
 export default function Home() {
   const router = useRouter();
@@ -30,17 +35,18 @@ export default function Home() {
     useCallback(() => {
       if (!user) return;
       (async () => {
-        const [workouts, moveGoal, moods, rules] = await Promise.all([
+        const [workouts, moveGoal, moods, rules, meals] = await Promise.all([
           listWorkouts().catch(() => []),
           getMoveGoalPerWeek(),
           listMoodEntries().catch(() => []),
           listScreenTimeRules().catch(() => []),
+          listEntriesForDay(todayIsoDate()).catch(() => []),
         ]);
         const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
         const thisWeek = workouts.filter((w) => new Date(w.started_at).getTime() >= weekAgo).length;
         setStatuses({
           move: moveGoal ? `${thisWeek}/${moveGoal} workouts this week` : `${thisWeek} workouts this week`,
-          fuel: "Log today's meals",
+          fuel: `${meals.length} meal${meals.length === 1 ? "" : "s"} logged today`,
           mind:
             moods.length > 0
               ? `Last check-in ${new Date(moods[0].logged_at).toLocaleDateString()}`

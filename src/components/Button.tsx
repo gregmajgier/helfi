@@ -22,7 +22,7 @@ export function Button({
 
   const backgroundColor =
     variant === "primary" ? accent : variant === "secondary" ? colors.surface : "transparent";
-  const textColor = variant === "primary" ? "#FFFFFF" : accent;
+  const textColor = variant === "primary" ? (color ? "#FFFFFF" : colors.background) : accent;
 
   return (
     <Pressable

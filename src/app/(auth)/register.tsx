@@ -80,6 +80,7 @@ export default function RegisterScreen() {
     } catch {
       // best-effort — registration already succeeded; never block reaching the hub over this
     }
+    router.dismissAll();
     router.replace("/" as Href);
   };
 
