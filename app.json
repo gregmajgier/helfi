@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "health_app",
+    "name": "helf",
     "slug": "health_app",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -28,7 +28,7 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
+          "backgroundColor": "#FBF9F6",
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
