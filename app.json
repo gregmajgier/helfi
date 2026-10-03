@@ -40,7 +40,8 @@
           "cameraPermission": "Allow $(PRODUCT_NAME) to photograph your meals for calorie estimation.",
           "microphonePermission": false
         }
-      ]
+      ],
+      ["expo-notifications", {}]
     ],
     "experiments": {
       "typedRoutes": true,
