@@ -117,3 +117,20 @@ def test_estimate_from_description_requires_auth(client):
     response = client.post("/meals/estimate-from-description", json={"description": "an apple"})
 
     assert response.status_code == 403
+
+
+def test_estimate_from_description_rejects_oversized_description(client, auth_headers):
+    headers = auth_headers()
+
+    response = client.post("/meals/estimate-from-description", json={"description": "a" * 501}, headers=headers)
+
+    assert response.status_code == 422
+
+
+def test_barcode_lookup_rejects_non_numeric_barcode(client, auth_headers):
+    headers = auth_headers()
+
+    response = client.get("/meals/foods/barcode/..%2F..%2Fadmin", headers=headers)
+
+    assert response.status_code in (404, 422)
+    assert client.get("/meals/foods/barcode/abc123", headers=headers).status_code == 422

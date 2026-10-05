@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Literal, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class FoodCreate(BaseModel):
@@ -62,4 +62,4 @@ class PhotoEstimateOut(BaseModel):
 
 
 class MealDescriptionIn(BaseModel):
-    description: str
+    description: str = Field(max_length=500)

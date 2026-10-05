@@ -1,7 +1,7 @@
 from datetime import date
 
 import httpx
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, HTTPException, Path, UploadFile, status
 
 from ..deps import get_current_user_id, get_food_repo, get_meal_entry_repo
 from .models import (
@@ -38,7 +38,7 @@ OPEN_FOOD_FACTS_URL = "https://world.openfoodfacts.org/api/v2/product/{barcode}.
 
 @router.get("/foods/barcode/{barcode}", response_model=FoodOut)
 async def lookup_barcode(
-    barcode: str,
+    barcode: str = Path(pattern=r"^\d{8,14}$"),
     user_id: str = Depends(get_current_user_id),
     food_repo=Depends(get_food_repo),
 ):
