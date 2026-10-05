@@ -10,6 +10,8 @@ export type DashboardSummary = {
     caloriePercent: number | null;
     trainingHours: number;
     rating: number | null;
+    /** Hours on non-excluded apps in the range (one decimal), null when untracked. */
+    screenTimeHours: number | null;
   };
   cards: Record<PillarKey, string>;
 };
