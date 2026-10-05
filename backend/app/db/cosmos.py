@@ -1,9 +1,14 @@
+import json
 import uuid
 from datetime import date, datetime, timezone
+from pathlib import Path
 from typing import Optional
 
 from azure.cosmos import PartitionKey
 from azure.cosmos.aio import CosmosClient
+
+_EXERCISES_SEED_PATH = Path(__file__).parent / "data" / "exercises_seed.json"
+_FOODS_SEED_PATH = Path(__file__).parent / "data" / "foods_seed.json"
 
 _client: Optional[CosmosClient] = None
 
@@ -30,11 +35,15 @@ async def init_cosmos(client: CosmosClient, database_name: str) -> None:
     await database.create_container_if_not_exists(
         id="meal_entries", partition_key=PartitionKey(path="/user_id")
     )
-    await database.create_container_if_not_exists(id="foods", partition_key=PartitionKey(path="/id"))
+    foods_container = await database.create_container_if_not_exists(
+        id="foods", partition_key=PartitionKey(path="/id")
+    )
     await database.create_container_if_not_exists(
         id="workouts", partition_key=PartitionKey(path="/user_id")
     )
-    await database.create_container_if_not_exists(id="exercises", partition_key=PartitionKey(path="/id"))
+    exercises_container = await database.create_container_if_not_exists(
+        id="exercises", partition_key=PartitionKey(path="/id")
+    )
     await database.create_container_if_not_exists(
         id="mood_entries", partition_key=PartitionKey(path="/user_id")
     )
@@ -44,6 +53,26 @@ async def init_cosmos(client: CosmosClient, database_name: str) -> None:
     await database.create_container_if_not_exists(
         id="screentime_rules", partition_key=PartitionKey(path="/user_id")
     )
+    await _seed_exercises(exercises_container)
+    await _seed_foods(foods_container)
+
+
+async def _seed_exercises(container) -> None:
+    # Idempotent: upsert_item by id, so re-running at every app startup never
+    # duplicates and never touches user-created exercises (created_by_user_id
+    # is never None for those).
+    records = json.loads(_EXERCISES_SEED_PATH.read_text())
+    for record in records:
+        await container.upsert_item({**record, "created_by_user_id": None})
+
+
+async def _seed_foods(container) -> None:
+    # Idempotent: upsert_item by id, so re-running at every app startup never
+    # duplicates and never touches user-created foods (created_by_user_id is
+    # never None for those, enforced in the /meals/foods create handler).
+    records = json.loads(_FOODS_SEED_PATH.read_text())
+    for record in records:
+        await container.upsert_item({**record, "created_by_user_id": None})
 
 
 class CosmosUserRepository:
@@ -140,18 +169,32 @@ class CosmosFoodRepository:
     def _container(self):
         return self._client.get_database_client(self._database_name).get_container_client("foods")
 
-    async def search(self, query: str) -> list[dict]:
-        container = self._container()
-        sql_query = "SELECT * FROM c WHERE CONTAINS(LOWER(c.name), @query)"
-        params = [{"name": "@query", "value": query.lower()}]
-        return [item async for item in container.query_items(query=sql_query, parameters=params)]
-
     async def get(self, food_id: str) -> Optional[dict]:
         container = self._container()
         try:
             return await container.read_item(item=food_id, partition_key=food_id)
         except Exception:
             return None
+
+    async def get_by_barcode(self, barcode: str) -> Optional[dict]:
+        # Only ever resolves to global/system records — never a user-submitted
+        # custom food, which would let one user's bad data poison another
+        # user's barcode scan of a real product.
+        container = self._container()
+        query = (
+            "SELECT * FROM c WHERE c.barcode = @barcode "
+            "AND (NOT IS_DEFINED(c.created_by_user_id) OR IS_NULL(c.created_by_user_id))"
+        )
+        params = [{"name": "@barcode", "value": barcode}]
+        async for item in container.query_items(query=query, parameters=params):
+            return item
+        return None
+
+    async def create(self, food: dict) -> dict:
+        container = self._container()
+        record = {**food, "id": str(uuid.uuid4())}
+        await container.create_item(record)
+        return record
 
 
 class CosmosWorkoutRepository:

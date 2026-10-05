@@ -1,21 +1,80 @@
 from datetime import date
 
+import httpx
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, status
 
 from ..deps import get_current_user_id, get_food_repo, get_meal_entry_repo
-from .models import FoodOut, MealEntryCreate, MealEntryOut, MealEntryUpdate, PhotoEstimateOut
+from .models import (
+    FoodCreate,
+    FoodOut,
+    MealDescriptionIn,
+    MealEntryCreate,
+    MealEntryOut,
+    MealEntryUpdate,
+    PhotoEstimateOut,
+)
 from .nutrition_estimator import get_nutrition_estimator
 
 router = APIRouter()
 
 
-@router.get("/foods/search", response_model=list[FoodOut])
-async def search_foods(
-    q: str,
+@router.post("/foods", response_model=FoodOut, status_code=status.HTTP_201_CREATED)
+async def create_custom_food(
+    body: FoodCreate,
     user_id: str = Depends(get_current_user_id),
     food_repo=Depends(get_food_repo),
 ):
-    return await food_repo.search(q)
+    # barcode is never client-writable here: it would let a user's custom food
+    # shadow or poison a real product's barcode for every other user who later
+    # scans it. Barcodes only ever come from our own seed data or a verified
+    # Open Food Facts lookup (see lookup_barcode below).
+    data = body.model_dump()
+    data.pop("barcode", None)
+    return await food_repo.create({**data, "barcode": None, "created_by_user_id": user_id})
+
+
+OPEN_FOOD_FACTS_URL = "https://world.openfoodfacts.org/api/v2/product/{barcode}.json"
+
+
+@router.get("/foods/barcode/{barcode}", response_model=FoodOut)
+async def lookup_barcode(
+    barcode: str,
+    user_id: str = Depends(get_current_user_id),
+    food_repo=Depends(get_food_repo),
+):
+    local = await food_repo.get_by_barcode(barcode)
+    if local:
+        return local
+
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            response = await client.get(OPEN_FOOD_FACTS_URL.format(barcode=barcode))
+    except httpx.HTTPError:
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="barcode lookup unavailable")
+
+    payload = response.json()
+    if response.status_code != 200 or payload.get("status") != 1:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="product not found")
+
+    product = payload["product"]
+    nutriments = product.get("nutriments", {})
+    name = product.get("product_name") or product.get("generic_name")
+    calories = nutriments.get("energy-kcal_100g")
+    if not name or calories is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="product missing nutrition data")
+
+    food = {
+        "name": name,
+        "serving_size": 100,
+        "serving_unit": "g",
+        "calories_per_serving": calories,
+        "protein_g": nutriments.get("proteins_100g", 0) or 0,
+        "carbs_g": nutriments.get("carbohydrates_100g", 0) or 0,
+        "fat_g": nutriments.get("fat_100g", 0) or 0,
+        "barcode": barcode,
+        "created_by_user_id": None,
+    }
+    return await food_repo.create(food)
 
 
 @router.post("/entries", response_model=MealEntryOut, status_code=status.HTTP_201_CREATED)
@@ -77,3 +136,14 @@ async def photo_estimate(
     if len(image_bytes) > MAX_PHOTO_BYTES:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="photo too large")
     return await estimator.estimate(image_bytes, content_type)
+
+
+@router.post("/estimate-from-description", response_model=PhotoEstimateOut)
+async def estimate_from_description(
+    body: MealDescriptionIn,
+    user_id: str = Depends(get_current_user_id),
+):
+    if not body.description.strip():
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="description is required")
+    estimator = get_nutrition_estimator()
+    return await estimator.estimate_from_text(body.description)

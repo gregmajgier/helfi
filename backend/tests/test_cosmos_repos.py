@@ -49,24 +49,25 @@ async def test_meal_entry_repository_list_for_day_queries_by_partition_key():
     assert [e["id"] for e in entries] == ["e1"]
 
 
-async def test_food_repository_search_queries_case_insensitive_substring():
+async def test_food_repository_get_by_barcode_only_matches_global_records():
     container = MagicMock()
     captured = {}
 
     async def fake_query_items(query, parameters):
         captured["query"] = query
         captured["parameters"] = parameters
-        for item in [{"id": "chicken-breast", "name": "Chicken Breast, cooked"}]:
+        for item in [{"id": "chicken-breast", "name": "Chicken Breast, cooked", "barcode": "123"}]:
             yield item
 
     container.query_items = fake_query_items
     repo = CosmosFoodRepository(_client_with_container(container), "health_app")
 
-    results = await repo.search("CHICK")
+    result = await repo.get_by_barcode("123")
 
-    assert [f["id"] for f in results] == ["chicken-breast"]
-    assert "CONTAINS(LOWER(c.name)" in captured["query"]
-    assert captured["parameters"] == [{"name": "@query", "value": "chick"}]
+    assert result["id"] == "chicken-breast"
+    assert "c.barcode = @barcode" in captured["query"]
+    assert "created_by_user_id" in captured["query"]
+    assert captured["parameters"] == [{"name": "@barcode", "value": "123"}]
 
 
 async def test_workout_repository_list_for_user_filters_by_type_and_partition_key():

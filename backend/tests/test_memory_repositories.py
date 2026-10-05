@@ -46,13 +46,19 @@ async def test_meal_entry_repository_crud_scoped_by_user():
     assert await repo.get("user-1", entry["id"]) is None
 
 
-async def test_food_repository_search_is_case_insensitive_substring_match():
-    repo = InMemoryFoodRepository(SEED_FOODS)
+async def test_food_repository_get_and_get_by_barcode():
+    repo = InMemoryFoodRepository([
+        {"id": "chicken-breast", "name": "Chicken Breast, cooked", "barcode": "123", "created_by_user_id": None},
+    ])
 
-    results = await repo.search("chick")
+    assert (await repo.get("chicken-breast"))["name"] == "Chicken Breast, cooked"
+    assert await repo.get("nonexistent-food-xyz") is None
+    assert (await repo.get_by_barcode("123"))["id"] == "chicken-breast"
+    assert await repo.get_by_barcode("nonexistent-barcode") is None
 
-    assert any("Chicken" in food["name"] for food in results)
-    assert await repo.search("nonexistent-food-xyz") == []
+
+async def test_seed_foods_are_loaded():
+    assert len(SEED_FOODS) > 100
 
 
 async def test_workout_repository_crud_scoped_by_user():

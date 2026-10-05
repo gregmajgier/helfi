@@ -1,19 +1,3 @@
-def test_search_foods_matches_partial_case_insensitive_name(client, auth_headers):
-    headers = auth_headers()
-
-    response = client.get("/meals/foods/search", params={"q": "CHICK"}, headers=headers)
-
-    assert response.status_code == 200
-    names = [f["name"] for f in response.json()]
-    assert any("Chicken" in name for name in names)
-
-
-def test_search_foods_requires_auth(client):
-    response = client.get("/meals/foods/search", params={"q": "chicken"})
-
-    assert response.status_code == 403
-
-
 ENTRY_PAYLOAD = {
     "meal_slot": "breakfast",
     "source": "quick_add",
@@ -104,3 +88,32 @@ def test_photo_estimate_rejects_oversized_photo(client, auth_headers):
     response = client.post("/meals/photo-estimate", headers=headers, files=files)
 
     assert response.status_code == 400
+
+
+def test_estimate_from_description_returns_estimate(client, auth_headers):
+    headers = auth_headers()
+
+    response = client.post(
+        "/meals/estimate-from-description",
+        json={"description": "a bowl of oatmeal with banana and peanut butter"},
+        headers=headers,
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["calories"] > 0
+    assert 0 <= body["confidence"] <= 1
+
+
+def test_estimate_from_description_rejects_empty_description(client, auth_headers):
+    headers = auth_headers()
+
+    response = client.post("/meals/estimate-from-description", json={"description": "   "}, headers=headers)
+
+    assert response.status_code == 400
+
+
+def test_estimate_from_description_requires_auth(client):
+    response = client.post("/meals/estimate-from-description", json={"description": "an apple"})
+
+    assert response.status_code == 403

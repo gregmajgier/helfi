@@ -4,19 +4,26 @@ from typing import Literal, Optional
 from pydantic import BaseModel
 
 
-class FoodOut(BaseModel):
-    id: str
+class FoodCreate(BaseModel):
     name: str
     serving_size: float
     serving_unit: str
     calories_per_serving: float
-    protein_g: float
-    carbs_g: float
-    fat_g: float
+    protein_g: float = 0
+    carbs_g: float = 0
+    fat_g: float = 0
+    barcode: Optional[str] = None
+
+
+class FoodOut(FoodCreate):
+    id: str
+    created_by_user_id: Optional[str] = None
 
 
 MealSlot = Literal["breakfast", "lunch", "dinner", "snack"]
-EntrySource = Literal["search", "quick_add", "photo_ai"]
+# "quick_add" is kept for backward compatibility with entries created before
+# that logging path was removed from the client — never written by new code.
+EntrySource = Literal["search", "quick_add", "photo_ai", "description_ai"]
 
 
 class MealEntryCreate(BaseModel):
@@ -51,4 +58,8 @@ class PhotoEstimateOut(BaseModel):
     carbs_g: float
     fat_g: float
     confidence: float
+    description: str
+
+
+class MealDescriptionIn(BaseModel):
     description: str

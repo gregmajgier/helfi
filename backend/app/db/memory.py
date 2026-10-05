@@ -1,6 +1,28 @@
+import json
 import uuid
 from datetime import date, datetime, timezone
+from pathlib import Path
 from typing import Optional
+
+_EXERCISES_SEED_PATH = Path(__file__).parent / "data" / "exercises_seed.json"
+_FOODS_SEED_PATH = Path(__file__).parent / "data" / "foods_seed.json"
+_COMMON_FOODS_SEED_PATH = Path(__file__).parent / "data" / "common_foods_seed.json"
+
+
+def _load_seed_exercises() -> list[dict]:
+    records = json.loads(_EXERCISES_SEED_PATH.read_text())
+    return [{**r, "created_by_user_id": None} for r in records]
+
+
+def _load_seed_foods() -> list[dict]:
+    # Open Food Facts' category search skews heavily toward branded/regional
+    # packaged products (mostly French/German), so it barely covers common
+    # English staple-food search terms like "chicken" or "apple" even though
+    # it's great for barcode lookups. The hand-authored common-foods list
+    # fills that gap; OFF data still covers real barcode scanning.
+    off_records = json.loads(_FOODS_SEED_PATH.read_text())
+    common_records = json.loads(_COMMON_FOODS_SEED_PATH.read_text())
+    return [{**r, "created_by_user_id": None} for r in common_records + off_records]
 
 
 class InMemoryUserRepository:
@@ -70,36 +92,26 @@ class InMemoryFoodRepository:
     def __init__(self, seed: list[dict]):
         self._foods = {f["id"]: dict(f) for f in seed}
 
-    async def search(self, query: str) -> list[dict]:
-        q = query.lower()
-        return [f for f in self._foods.values() if q in f["name"].lower()]
-
     async def get(self, food_id: str) -> Optional[dict]:
         return self._foods.get(food_id)
 
+    async def get_by_barcode(self, barcode: str) -> Optional[dict]:
+        # Only ever resolves to global/system records (created_by_user_id is
+        # None) — never a user-submitted custom food, which would let one
+        # user's bad data poison another user's barcode scan of a real product.
+        for food in self._foods.values():
+            if food.get("barcode") == barcode and food.get("created_by_user_id") is None:
+                return food
+        return None
 
-SEED_FOODS: list[dict] = [
-    {
-        "id": "chicken-breast", "name": "Chicken Breast, cooked",
-        "serving_size": 100, "serving_unit": "g",
-        "calories_per_serving": 165, "protein_g": 31, "carbs_g": 0, "fat_g": 3.6,
-    },
-    {
-        "id": "white-rice", "name": "White Rice, cooked",
-        "serving_size": 100, "serving_unit": "g",
-        "calories_per_serving": 130, "protein_g": 2.7, "carbs_g": 28, "fat_g": 0.3,
-    },
-    {
-        "id": "banana", "name": "Banana",
-        "serving_size": 118, "serving_unit": "g",
-        "calories_per_serving": 105, "protein_g": 1.3, "carbs_g": 27, "fat_g": 0.4,
-    },
-    {
-        "id": "egg", "name": "Egg, large",
-        "serving_size": 50, "serving_unit": "g",
-        "calories_per_serving": 78, "protein_g": 6.3, "carbs_g": 0.6, "fat_g": 5.3,
-    },
-]
+    async def create(self, food: dict) -> dict:
+        food_id = str(uuid.uuid4())
+        record = {**food, "id": food_id}
+        self._foods[food_id] = record
+        return record
+
+
+SEED_FOODS: list[dict] = _load_seed_foods()
 
 
 class InMemoryWorkoutRepository:
@@ -157,17 +169,7 @@ class InMemoryExerciseRepository:
         return record
 
 
-SEED_EXERCISES: list[dict] = [
-    {"id": "bench-press", "name": "Bench Press", "category": "chest", "is_bodyweight": False, "created_by_user_id": None},
-    {"id": "squat", "name": "Barbell Squat", "category": "legs", "is_bodyweight": False, "created_by_user_id": None},
-    {"id": "deadlift", "name": "Deadlift", "category": "back", "is_bodyweight": False, "created_by_user_id": None},
-    {"id": "overhead-press", "name": "Overhead Press", "category": "shoulders", "is_bodyweight": False, "created_by_user_id": None},
-    {"id": "bicep-curl", "name": "Bicep Curl", "category": "arms", "is_bodyweight": False, "created_by_user_id": None},
-    {"id": "pull-up", "name": "Pull-Up", "category": "back", "is_bodyweight": True, "created_by_user_id": None},
-    {"id": "push-up", "name": "Push-Up", "category": "chest", "is_bodyweight": True, "created_by_user_id": None},
-    {"id": "plank", "name": "Plank", "category": "core", "is_bodyweight": True, "created_by_user_id": None},
-    {"id": "lunge", "name": "Lunge", "category": "legs", "is_bodyweight": True, "created_by_user_id": None},
-]
+SEED_EXERCISES: list[dict] = _load_seed_exercises()
 
 
 class InMemoryMoodEntryRepository:
