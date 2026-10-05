@@ -1,7 +1,7 @@
 import { useRouter, type Href } from "expo-router";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
-import { ScreenContainer } from "@/components";
+import { AnimatedPressable, ScreenContainer } from "@/components";
 import { setPendingAnswer } from "@/lib/onboarding-store";
 import { useTheme } from "@/lib/theme";
 
@@ -31,7 +31,7 @@ export default function OnboardingCheckInMindRoute() {
       </Text>
       <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
         {MOOD_OPTIONS.map((option) => (
-          <Pressable
+          <AnimatedPressable
             key={option.score}
             onPress={() => pick(option.score)}
             style={{ alignItems: "center", gap: 4 }}
@@ -40,7 +40,7 @@ export default function OnboardingCheckInMindRoute() {
             <Text style={{ fontFamily: font.regular, fontSize: 12, color: colors.textSecondary }}>
               {option.label}
             </Text>
-          </Pressable>
+          </AnimatedPressable>
         ))}
       </View>
     </ScreenContainer>

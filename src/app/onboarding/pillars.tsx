@@ -2,8 +2,8 @@ import { useRouter, type Href } from "expo-router";
 import { useState } from "react";
 import { Text, View } from "react-native";
 
-import { Button, ProgressDots, ScreenContainer } from "@/components";
-import { useTheme, type PillarKey } from "@/lib/theme";
+import { Button, PillarIcon, ProgressDots, ScreenContainer } from "@/components";
+import { tint, useTheme, type PillarKey } from "@/lib/theme";
 
 const SLIDES: { pillar: PillarKey; copy: string }[] = [
   { pillar: "move", copy: "Log workouts and watch your training add up." },
@@ -29,12 +29,12 @@ export default function OnboardingPillarsRoute() {
             width: 96,
             height: 96,
             borderRadius: 24,
-            backgroundColor: accent,
+            backgroundColor: tint(accent, 0.18),
             alignItems: "center",
             justifyContent: "center",
           }}
         >
-          <Text style={{ fontSize: 48 }}>{info.icon}</Text>
+          <PillarIcon pillar={slide.pillar} size={52} />
         </View>
         <Text style={{ fontFamily: font.extrabold, fontSize: 26, color: colors.textPrimary }}>{info.label}</Text>
         <Text

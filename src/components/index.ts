@@ -1,6 +1,10 @@
 export { Button } from "./Button";
 export { Card } from "./Card";
 export { Chip } from "./Chip";
+export { AnimatedPressable } from "./AnimatedPressable";
+export { PillarIcon } from "./PillarIcon";
 export { PillarTile } from "./PillarTile";
 export { ProgressDots } from "./ProgressDots";
 export { ScreenContainer } from "./ScreenContainer";
+export { RingCluster } from "./RingCluster";
+export { StatTile } from "./StatTile";

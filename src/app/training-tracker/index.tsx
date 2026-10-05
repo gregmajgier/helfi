@@ -1,7 +1,9 @@
 import { useFocusEffect, useRouter, type Href } from "expo-router";
 import { useCallback, useState } from "react";
-import { Alert, Button, FlatList, SafeAreaView, Text, View } from "react-native";
+import { Alert, FlatList, Text, View } from "react-native";
 
+import { Button, ScreenContainer } from "@/components";
+import { useTheme } from "@/lib/theme";
 import { deleteWorkout, listWorkouts } from "@/modules/training_tracker/api";
 import type { Workout } from "@/modules/training_tracker/types";
 
@@ -16,6 +18,8 @@ function summarize(workout: Workout): string {
 
 export default function TrainingTrackerRoute() {
   const router = useRouter();
+  const { colors, pillars, font, spacing } = useTheme();
+  const accent = pillars.move.light;
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -39,27 +43,43 @@ export default function TrainingTrackerRoute() {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, padding: 16, gap: 12 }}>
-      <Text style={{ fontSize: 20, fontWeight: "600" }}>Training History</Text>
+    <ScreenContainer>
+      <Text style={{ fontFamily: font.extrabold, fontSize: 24, color: colors.textPrimary }}>Move</Text>
 
-      {error ? <Text style={{ color: "red" }}>{error}</Text> : null}
+      {error ? <Text style={{ color: colors.danger, fontFamily: font.regular }}>{error}</Text> : null}
 
       <FlatList
         data={workouts}
         keyExtractor={(item) => item.id}
         refreshing={isLoading}
         onRefresh={load}
-        ListEmptyComponent={<Text>No workouts logged yet.</Text>}
+        style={{ flex: 1 }}
+        ListEmptyComponent={
+          <Text style={{ color: colors.textSecondary, fontFamily: font.regular }}>No workouts logged yet.</Text>
+        }
         renderItem={({ item }) => (
-          <View style={{ flexDirection: "row", justifyContent: "space-between", paddingVertical: 8 }}>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              paddingVertical: spacing.sm,
+              borderBottomWidth: 1,
+              borderBottomColor: colors.border,
+            }}
+          >
             <View>
-              <Text>{summarize(item)}</Text>
-              <Text>
+              <Text style={{ fontFamily: font.semibold, color: colors.textPrimary, textTransform: "capitalize" }}>
+                {summarize(item)}
+              </Text>
+              <Text style={{ fontFamily: font.regular, color: colors.textSecondary, fontSize: 13 }}>
                 {new Date(item.started_at).toLocaleDateString()} · {Math.round(item.duration_s / 60)} min
               </Text>
             </View>
             <Button
               title="Delete"
+              variant="text"
+              color={colors.danger}
               onPress={() => {
                 Alert.alert("Delete workout?", "This can't be undone.", [
                   { text: "Cancel", style: "cancel" },
@@ -83,14 +103,20 @@ export default function TrainingTrackerRoute() {
         )}
       />
 
-      <View style={{ flexDirection: "row", gap: 8 }}>
-        <Button title="Log Strength" onPress={() => router.push("/training-tracker/log-strength" as Href)} />
-        <Button title="Log Cardio" onPress={() => router.push("/training-tracker/log-cardio" as Href)} />
+      <View style={{ flexDirection: "row", gap: spacing.sm }}>
+        <View style={{ flex: 1 }}>
+          <Button title="Log Strength" color={accent} onPress={() => router.push("/training-tracker/log-strength" as Href)} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Button title="Log Cardio" color={accent} onPress={() => router.push("/training-tracker/log-cardio" as Href)} />
+        </View>
       </View>
       <Button
         title="Exercise Library"
+        variant="secondary"
+        color={accent}
         onPress={() => router.push("/training-tracker/exercise-library" as Href)}
       />
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }

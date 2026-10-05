@@ -1,8 +1,8 @@
 import { useFocusEffect, useRouter, type Href } from "expo-router";
 import { useCallback, useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 
-import { Button, Card, ScreenContainer } from "@/components";
+import { AnimatedPressable, Button, Card, ScreenContainer } from "@/components";
 import { useTheme } from "@/lib/theme";
 import { createMoodEntry, getTodaysPrompt, listMoodEntries } from "@/modules/mental_health/api";
 import type { MoodEntry } from "@/modules/mental_health/types";
@@ -58,7 +58,7 @@ export default function MentalHealthRoute() {
     <ScreenContainer>
       <ScrollView contentContainerStyle={{ gap: spacing.md }}>
         <Text style={{ fontFamily: font.extrabold, fontSize: 24, color: colors.textPrimary }}>Mind</Text>
-        {error ? <Text style={{ color: "#C0392B" }}>{error}</Text> : null}
+        {error ? <Text style={{ color: colors.danger }}>{error}</Text> : null}
 
         <Card>
           <Text style={{ fontFamily: font.semibold, fontSize: 16, color: colors.textPrimary }}>
@@ -66,24 +66,24 @@ export default function MentalHealthRoute() {
           </Text>
           <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
             {MOOD_OPTIONS.map((option) => (
-              <Pressable
+              <AnimatedPressable
                 key={option.score}
                 disabled={saving}
                 onPress={() => checkIn(option.score)}
-                style={{ alignItems: "center", gap: 4, opacity: saving ? 0.5 : 1 }}
+                style={{ alignItems: "center", gap: 4 }}
               >
                 <Text style={{ fontSize: 28 }}>{option.emoji}</Text>
                 <Text style={{ fontFamily: font.regular, fontSize: 11, color: colors.textSecondary }}>
                   {option.label}
                 </Text>
-              </Pressable>
+              </AnimatedPressable>
             ))}
           </View>
         </Card>
 
         <Card style={{ borderColor: accent, borderWidth: 1.5 }}>
           <Text style={{ fontFamily: font.semibold, fontSize: 13, color: colors.textSecondary }}>
-            TODAY'S PROMPT
+            TODAY&apos;S PROMPT
           </Text>
           <Text style={{ fontFamily: font.regular, fontSize: 15, color: colors.textPrimary }}>
             {prompt ?? "Loading..."}

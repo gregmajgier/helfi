@@ -1,44 +1,50 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
+import Animated from "react-native-reanimated";
 
-import { useTheme, type PillarKey } from "@/lib/theme";
+import { useEnter } from "@/lib/motion";
+import { accentShadow, tint, useTheme, type PillarKey } from "@/lib/theme";
+
+import { AnimatedPressable } from "./AnimatedPressable";
+import { PillarIcon } from "./PillarIcon";
 
 export function PillarTile({
   pillar,
   status,
   onPress,
+  index = 0,
 }: {
   pillar: PillarKey;
   status: string;
   onPress: () => void;
+  index?: number;
 }) {
-  const { colors, mode, pillars, font, spacing } = useTheme();
+  const { colors, mode, pillars, font, spacing, radius } = useTheme();
   const info = pillars[pillar];
   const accent = info[mode];
+  const entering = useEnter(index);
 
   return (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.base,
-        {
-          backgroundColor: colors.surface,
-          borderColor: accent,
-          padding: spacing.lg,
-          opacity: pressed ? 0.85 : 1,
-        },
-      ]}
-    >
-      <View style={[styles.iconBadge, { backgroundColor: accent }]}>
-        <Text style={styles.icon}>{info.icon}</Text>
-      </View>
-      <Text style={{ fontFamily: font.bold, fontSize: 18, color: colors.textPrimary }}>{info.label}</Text>
-      <Text style={{ fontFamily: font.regular, fontSize: 13, color: colors.textSecondary }}>{status}</Text>
-    </Pressable>
+    <Animated.View entering={entering} style={styles.cell}>
+      <AnimatedPressable
+        onPress={onPress}
+        style={[
+          styles.base,
+          { backgroundColor: tint(accent, mode === "dark" ? 0.18 : 0.14), borderRadius: radius.lg, padding: spacing.lg },
+          accentShadow(accent),
+        ]}
+      >
+        <View style={[styles.iconBadge, { backgroundColor: tint(accent, 0.28) }]}>
+          <PillarIcon pillar={pillar} size={26} />
+        </View>
+        <Text style={{ fontFamily: font.extrabold, fontSize: 20, color: colors.textPrimary }}>{info.label}</Text>
+        <Text style={{ fontFamily: font.medium, fontSize: 13, color: colors.textSecondary }}>{status}</Text>
+      </AnimatedPressable>
+    </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
-  base: { borderRadius: 20, borderWidth: 2, gap: 6, flexBasis: "47%", flexGrow: 1 },
-  iconBadge: { width: 40, height: 40, borderRadius: 12, alignItems: "center", justifyContent: "center" },
-  icon: { fontSize: 20 },
+  cell: { flexBasis: "47%", flexGrow: 1 },
+  base: { gap: 6 },
+  iconBadge: { width: 44, height: 44, borderRadius: 999, alignItems: "center", justifyContent: "center" },
 });

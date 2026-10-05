@@ -93,7 +93,7 @@ export default function RuleBuilderRoute() {
           color: colors.textPrimary,
         }}
       />
-      {error ? <Text style={{ color: "#C0392B" }}>{error}</Text> : null}
+      {error ? <Text style={{ color: colors.danger }}>{error}</Text> : null}
       <Button title="Save rule" color={accent} onPress={save} disabled={saving} />
     </ScreenContainer>
   );

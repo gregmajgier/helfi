@@ -28,7 +28,7 @@ export default function OnboardingGoalFuelRoute() {
   return (
     <ScreenContainer style={{ justifyContent: "center", gap: spacing.lg }}>
       <Text style={{ fontFamily: font.extrabold, fontSize: 24, color: colors.textPrimary }}>
-        What's your main food goal?
+        What&apos;s your main food goal?
       </Text>
       <View style={{ gap: spacing.sm }}>
         {FUEL_OPTIONS.map((option) => (

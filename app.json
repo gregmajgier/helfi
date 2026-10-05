@@ -41,6 +41,12 @@
           "microphonePermission": false
         }
       ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to scan food barcodes."
+        }
+      ],
       ["expo-notifications", {}]
     ],
     "experiments": {

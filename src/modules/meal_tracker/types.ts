@@ -1,5 +1,5 @@
 export type MealSlot = "breakfast" | "lunch" | "dinner" | "snack";
-export type EntrySource = "search" | "quick_add" | "photo_ai";
+export type EntrySource = "search" | "quick_add" | "photo_ai" | "description_ai";
 
 export type FoodOut = {
   id: string;
@@ -10,6 +10,19 @@ export type FoodOut = {
   protein_g: number;
   carbs_g: number;
   fat_g: number;
+  barcode?: string;
+  created_by_user_id?: string;
+};
+
+export type FoodCreateInput = {
+  name: string;
+  serving_size: number;
+  serving_unit: string;
+  calories_per_serving: number;
+  protein_g: number;
+  carbs_g: number;
+  fat_g: number;
+  barcode?: string;
 };
 
 export type MealEntry = {

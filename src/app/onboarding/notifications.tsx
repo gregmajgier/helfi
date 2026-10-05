@@ -1,11 +1,12 @@
 import { useRouter, type Href } from "expo-router";
-import * as Notifications from "expo-notifications";
 import { Platform, Text } from "react-native";
 
 import { Button, ScreenContainer } from "@/components";
 import { useTheme } from "@/lib/theme";
 
 async function scheduleDailyMindReminder() {
+  // Lazy import: expo-notifications throws on import in Android Expo Go (SDK 53+), so it must stay inside the caller's try/catch.
+  const Notifications = await import("expo-notifications");
   if (Platform.OS === "android") {
     await Notifications.setNotificationChannelAsync("default", {
       name: "Default Channel",
@@ -47,7 +48,7 @@ export default function OnboardingNotificationsRoute() {
       <Text
         style={{ fontFamily: font.regular, fontSize: 15, color: colors.textSecondary, textAlign: "center" }}
       >
-        We'll remind you once a day at 8pm. You can ignore it any time.
+        We&apos;ll remind you once a day at 8pm. You can ignore it any time.
       </Text>
       <Button title="Turn on reminders" onPress={enable} />
       <Button title="Not now" variant="text" onPress={next} />

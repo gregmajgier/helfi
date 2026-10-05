@@ -36,7 +36,7 @@ export default function MentalHealthHistoryRoute() {
     <ScreenContainer style={{ gap: spacing.lg }}>
       <ScrollView contentContainerStyle={{ gap: spacing.lg }}>
         <Text style={{ fontFamily: font.bold, fontSize: 20, color: colors.textPrimary }}>History</Text>
-        {error ? <Text style={{ color: "#C0392B" }}>{error}</Text> : null}
+        {error ? <Text style={{ color: colors.danger }}>{error}</Text> : null}
 
         <Text style={{ fontFamily: font.semibold, fontSize: 14, color: colors.textSecondary }}>
           Mood check-ins

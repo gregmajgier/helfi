@@ -1,10 +1,14 @@
 import { useRef, useState } from "react";
-import { Button, FlatList, SafeAreaView, Text, TextInput } from "react-native";
+import { FlatList, Text, TextInput, View } from "react-native";
 
+import { Button, ScreenContainer } from "@/components";
+import { useTheme } from "@/lib/theme";
 import { createExercise, searchExercises } from "@/modules/training_tracker/api";
 import type { Exercise } from "@/modules/training_tracker/types";
 
 export default function ExerciseLibraryScreen() {
+  const { colors, pillars, font, spacing } = useTheme();
+  const accent = pillars.move.light;
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Exercise[]>([]);
   const [newName, setNewName] = useState("");
@@ -40,41 +44,55 @@ export default function ExerciseLibraryScreen() {
     }
   };
 
+  const inputStyle = {
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.md,
+    borderRadius: 12,
+    fontFamily: font.regular,
+    color: colors.textPrimary,
+    backgroundColor: colors.surface,
+  } as const;
+
   return (
-    <SafeAreaView style={{ flex: 1, padding: 16, gap: 12 }}>
-      {error ? <Text style={{ color: "red" }}>{error}</Text> : null}
+    <ScreenContainer>
+      {error ? <Text style={{ color: colors.danger, fontFamily: font.regular }}>{error}</Text> : null}
 
       <TextInput
         placeholder="Search exercises"
+        placeholderTextColor={colors.textSecondary}
         value={query}
         onChangeText={onSearch}
-        style={{ borderWidth: 1, padding: 12, borderRadius: 8 }}
+        style={inputStyle}
       />
       <FlatList
         data={results}
         keyExtractor={(item) => item.id}
+        style={{ flex: 1 }}
         renderItem={({ item }) => (
-          <Text style={{ paddingVertical: 8 }}>
-            {item.name} · {item.category}
-            {item.is_bodyweight ? " · bodyweight" : ""}
-          </Text>
+          <View style={{ paddingVertical: spacing.sm, borderBottomWidth: 1, borderBottomColor: colors.border }}>
+            <Text style={{ fontFamily: font.medium, color: colors.textPrimary, textTransform: "capitalize" }}>
+              {item.name} · {item.category}
+              {item.is_bodyweight ? " · bodyweight" : ""}
+            </Text>
+          </View>
         )}
       />
 
-      <Text style={{ fontWeight: "600" }}>Add a custom exercise</Text>
-      <TextInput
-        placeholder="Name"
-        value={newName}
-        onChangeText={setNewName}
-        style={{ borderWidth: 1, padding: 12, borderRadius: 8 }}
-      />
-      <TextInput
-        placeholder="Category (e.g. chest, back, legs)"
-        value={newCategory}
-        onChangeText={setNewCategory}
-        style={{ borderWidth: 1, padding: 12, borderRadius: 8 }}
-      />
-      <Button title="Add Exercise" onPress={addCustomExercise} />
-    </SafeAreaView>
+      <Text style={{ fontFamily: font.semibold, fontSize: 14, color: colors.textSecondary }}>
+        Add a custom exercise
+      </Text>
+      <TextInput placeholder="Name" placeholderTextColor={colors.textSecondary} value={newName} onChangeText={setNewName} style={inputStyle} />
+      <View style={{ flexDirection: "row", gap: spacing.sm }}>
+        <TextInput
+          placeholder="Category (e.g. chest, back, legs)"
+          placeholderTextColor={colors.textSecondary}
+          value={newCategory}
+          onChangeText={setNewCategory}
+          style={[inputStyle, { flex: 1 }]}
+        />
+      </View>
+      <Button title="Add Exercise" color={accent} onPress={addCustomExercise} />
+    </ScreenContainer>
   );
 }

@@ -1,10 +1,16 @@
 import * as ImagePicker from "expo-image-picker";
-import { useRouter, type Href } from "expo-router";
+import { useLocalSearchParams, useRouter, type Href } from "expo-router";
 import { useEffect } from "react";
-import { SafeAreaView, Text } from "react-native";
+import { Text } from "react-native";
+
+import { ScreenContainer } from "@/components";
+import { useTheme } from "@/lib/theme";
+import type { MealSlot } from "@/modules/meal_tracker/types";
 
 export default function CameraScreen() {
   const router = useRouter();
+  const { colors, font } = useTheme();
+  const { mealSlot } = useLocalSearchParams<{ mealSlot: MealSlot }>();
 
   useEffect(() => {
     (async () => {
@@ -22,14 +28,14 @@ export default function CameraScreen() {
 
       router.replace({
         pathname: "/meal-tracker/confirm-estimate",
-        params: { photoUri: result.assets[0].uri },
+        params: { photoUri: result.assets[0].uri, mealSlot },
       } as Href);
     })();
-  }, [router]);
+  }, [router, mealSlot]);
 
   return (
-    <SafeAreaView style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <Text>Opening camera…</Text>
-    </SafeAreaView>
+    <ScreenContainer style={{ justifyContent: "center", alignItems: "center" }}>
+      <Text style={{ fontFamily: font.medium, fontSize: 16, color: colors.textSecondary }}>Opening camera…</Text>
+    </ScreenContainer>
   );
 }

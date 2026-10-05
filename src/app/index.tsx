@@ -1,60 +1,47 @@
 import { Redirect, useFocusEffect, useRouter, type Href } from "expo-router";
 import { useCallback, useState } from "react";
-import { Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 
-import { PillarTile, ScreenContainer } from "@/components";
+import { Chip, PillarTile, RingCluster, ScreenContainer, StatTile } from "@/components";
 import { useAuth } from "@/lib/auth-context";
-import { getMoveGoalPerWeek, isOnboardingComplete } from "@/lib/onboarding-store";
+import { isOnboardingComplete } from "@/lib/onboarding-store";
 import { useTheme } from "@/lib/theme";
-import { listScreenTimeRules } from "@/modules/digital_health/api";
-import { listEntriesForDay } from "@/modules/meal_tracker/api";
-import { listMoodEntries } from "@/modules/mental_health/api";
-import { listWorkouts } from "@/modules/training_tracker/api";
+import { rangeFor } from "@/modules/dashboard/summary";
+import type { ViewMode } from "@/modules/dashboard/types";
+import { useDashboardSummary } from "@/modules/dashboard/useDashboardSummary";
 
-type Statuses = { move: string; fuel: string; mind: string; focus: string };
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-const INITIAL_STATUSES: Statuses = {
-  move: "Loading...",
-  fuel: "Loading...",
-  mind: "Loading...",
-  focus: "Loading...",
-};
+function sameDay(a: Date, b: Date) {
+  return a.toDateString() === b.toDateString();
+}
 
-function todayIsoDate(): string {
-  return new Date().toISOString().slice(0, 10);
+function labelFor(anchor: Date, mode: ViewMode): { main: string; sub: string } {
+  const today = new Date();
+  const { days } = rangeFor(anchor, mode);
+  const fmt = (d: Date) => `${MONTHS[d.getMonth()]} ${d.getDate()}`;
+  if (mode === "day") {
+    const yesterday = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1);
+    const main = sameDay(anchor, today) ? "Today" : sameDay(anchor, yesterday) ? "Yesterday" : fmt(anchor);
+    return { main, sub: fmt(anchor) };
+  }
+  const thisWeek = sameDay(rangeFor(today, "week").days[0], days[0]);
+  return { main: thisWeek ? "This week" : "Week of", sub: `${fmt(days[0])} - ${fmt(days[6])}` };
 }
 
 export default function Home() {
   const router = useRouter();
   const { user, isLoading, logout } = useAuth();
-  const { colors, font, spacing } = useTheme();
+  const { colors, font, spacing, pillars, mode: theme } = useTheme();
   const [onboardingComplete, setOnboardingComplete] = useState<boolean | null>(null);
-  const [statuses, setStatuses] = useState<Statuses>(INITIAL_STATUSES);
+  const [mode, setMode] = useState<ViewMode>("day");
+  const [anchor, setAnchor] = useState(() => new Date());
+  const { summary, reload } = useDashboardSummary(anchor, mode, !!user);
 
   useFocusEffect(
     useCallback(() => {
-      if (!user) return;
-      (async () => {
-        const [workouts, moveGoal, moods, rules, meals] = await Promise.all([
-          listWorkouts().catch(() => []),
-          getMoveGoalPerWeek(),
-          listMoodEntries().catch(() => []),
-          listScreenTimeRules().catch(() => []),
-          listEntriesForDay(todayIsoDate()).catch(() => []),
-        ]);
-        const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-        const thisWeek = workouts.filter((w) => new Date(w.started_at).getTime() >= weekAgo).length;
-        setStatuses({
-          move: moveGoal ? `${thisWeek}/${moveGoal} workouts this week` : `${thisWeek} workouts this week`,
-          fuel: `${meals.length} meal${meals.length === 1 ? "" : "s"} logged today`,
-          mind:
-            moods.length > 0
-              ? `Last check-in ${new Date(moods[0].logged_at).toLocaleDateString()}`
-              : "No check-ins yet",
-          focus: `${rules.filter((r) => r.enabled).length} active rule${rules.filter((r) => r.enabled).length === 1 ? "" : "s"}`,
-        });
-      })();
-    }, [user])
+      if (user) reload();
+    }, [user, reload])
   );
 
   useFocusEffect(
@@ -75,20 +62,66 @@ export default function Home() {
     return <Redirect href={(onboardingComplete ? "/login" : "/onboarding") as Href} />;
   }
 
+  const step = mode === "week" ? 7 : 1;
+  const shift = (dir: number) => setAnchor((a) => new Date(a.getFullYear(), a.getMonth(), a.getDate() + dir * step));
+  // eslint-disable-next-line react-hooks/purity -- range-in-future check is intentionally evaluated at render time
+  const atPresent = rangeFor(anchor, mode).end.getTime() > Date.now();
+  const label = labelFor(anchor, mode);
+  const timeUnit = mode === "week" ? "Week rating" : "Day rating";
+  const stats = summary?.stats;
+
   return (
     <ScreenContainer>
-      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-        <Text style={{ fontFamily: font.extrabold, fontSize: 24, color: colors.textPrimary }}>helf</Text>
-        <Text onPress={logout} style={{ fontFamily: font.medium, fontSize: 14, color: colors.textSecondary }}>
-          Log out
-        </Text>
-      </View>
-      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.md }}>
-        <PillarTile pillar="move" status={statuses.move} onPress={() => router.push("/training-tracker" as Href)} />
-        <PillarTile pillar="fuel" status={statuses.fuel} onPress={() => router.push("/meal-tracker" as Href)} />
-        <PillarTile pillar="mind" status={statuses.mind} onPress={() => router.push("/mental-health" as Href)} />
-        <PillarTile pillar="focus" status={statuses.focus} onPress={() => router.push("/digital-health" as Href)} />
-      </View>
+      <ScrollView contentContainerStyle={{ gap: spacing.lg, paddingBottom: spacing.xl }} showsVerticalScrollIndicator={false}>
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+          <Text style={{ fontFamily: font.extrabold, fontSize: 28 }}>
+            {["h", "e", "l", "f"].map((ch, i) => (
+              <Text key={ch} style={{ color: pillars[(["move", "fuel", "mind", "focus"] as const)[i]][theme] }}>
+                {ch}
+              </Text>
+            ))}
+          </Text>
+          <Text onPress={logout} style={{ fontFamily: font.medium, fontSize: 14, color: colors.textSecondary }}>
+            Log out
+          </Text>
+        </View>
+
+        <View style={{ flexDirection: "row", gap: spacing.sm, justifyContent: "center" }}>
+          <Chip label="Day" selected={mode === "day"} onPress={() => setMode("day")} />
+          <Chip label="Week" selected={mode === "week"} onPress={() => setMode("week")} />
+        </View>
+
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+          <Text onPress={() => shift(-1)} style={{ fontFamily: font.bold, fontSize: 28, color: colors.textPrimary, paddingHorizontal: spacing.md }}>
+            {"\u2039"}
+          </Text>
+          <Text style={{ fontFamily: font.semibold, fontSize: 14, color: colors.textSecondary }}>{label.sub}</Text>
+          <Text
+            onPress={atPresent ? undefined : () => shift(1)}
+            style={{ fontFamily: font.bold, fontSize: 28, color: colors.textPrimary, opacity: atPresent ? 0.25 : 1, paddingHorizontal: spacing.md }}
+          >
+            {"\u203A"}
+          </Text>
+        </View>
+
+        <RingCluster rings={summary?.rings ?? []}>
+          <Text style={{ fontFamily: font.extrabold, fontSize: 22, color: colors.textPrimary }}>{label.main}</Text>
+        </RingCluster>
+
+        <View style={{ flexDirection: "row", gap: spacing.sm }}>
+          <StatTile index={0} value={stats?.caloriePercent == null ? "-" : `${stats.caloriePercent}%`} label="Calorie goal" />
+          <StatTile index={1} value={stats ? `${stats.trainingHours}h` : "-"} label="Trained" />
+          <StatTile index={2} value="-" label="Screen time" />
+          <StatTile index={3} value={stats?.rating == null ? "-" : `${stats.rating}/5`} label={timeUnit} />
+        </View>
+
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.md }}>
+          <PillarTile index={0} pillar="move" status={summary?.cards.move ?? "Loading..."} onPress={() => router.push("/training-tracker" as Href)} />
+          <PillarTile index={1} pillar="fuel" status={summary?.cards.fuel ?? "Loading..."} onPress={() => router.push("/meal-tracker" as Href)} />
+          <PillarTile index={2} pillar="mind" status={summary?.cards.mind ?? "Loading..."} onPress={() => router.push("/mental-health" as Href)} />
+          <PillarTile index={3} pillar="focus" status={summary?.cards.focus ?? "Loading..."} onPress={() => router.push("/digital-health" as Href)} />
+        </View>
+      </ScrollView>
     </ScreenContainer>
   );
 }

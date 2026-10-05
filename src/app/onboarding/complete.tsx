@@ -26,7 +26,7 @@ export default function OnboardingCompleteRoute() {
 
   return (
     <ScreenContainer style={{ justifyContent: "center", gap: spacing.lg }}>
-      <Text style={{ fontFamily: font.extrabold, fontSize: 24, color: colors.textPrimary }}>You're all set</Text>
+      <Text style={{ fontFamily: font.extrabold, fontSize: 24, color: colors.textPrimary }}>You&apos;re all set</Text>
       <Card>
         <Text style={{ color: colors.textPrimary }}>Move: {answers.moveGoalPerWeek ?? "—"} workouts/week</Text>
         <Text style={{ color: colors.textPrimary }}>

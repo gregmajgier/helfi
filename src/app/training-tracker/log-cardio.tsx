@@ -1,7 +1,9 @@
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Button, SafeAreaView, Text, TextInput, View } from "react-native";
+import { Text, TextInput, View } from "react-native";
 
+import { Button, Chip, ScreenContainer } from "@/components";
+import { useTheme } from "@/lib/theme";
 import { createWorkout } from "@/modules/training_tracker/api";
 import type { WorkoutType } from "@/modules/training_tracker/types";
 
@@ -9,11 +11,23 @@ const CARDIO_TYPES: WorkoutType[] = ["running", "cycling"];
 
 export default function LogCardioScreen() {
   const router = useRouter();
+  const { colors, pillars, font, spacing } = useTheme();
+  const accent = pillars.move.light;
   const [workoutType, setWorkoutType] = useState<WorkoutType>("running");
   const [durationMinutes, setDurationMinutes] = useState("");
   const [distanceKm, setDistanceKm] = useState("");
   const [elevationM, setElevationM] = useState("");
   const [error, setError] = useState<string | null>(null);
+
+  const inputStyle = {
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.md,
+    borderRadius: 12,
+    fontFamily: font.regular,
+    color: colors.textPrimary,
+    backgroundColor: colors.surface,
+  } as const;
 
   const save = async () => {
     const duration_s = Math.round(Number(durationMinutes) * 60);
@@ -38,43 +52,41 @@ export default function LogCardioScreen() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, padding: 16, gap: 12 }}>
-      {error ? <Text style={{ color: "red" }}>{error}</Text> : null}
+    <ScreenContainer>
+      {error ? <Text style={{ color: colors.danger, fontFamily: font.regular }}>{error}</Text> : null}
 
-      <View style={{ flexDirection: "row", gap: 8 }}>
+      <View style={{ flexDirection: "row", gap: spacing.sm }}>
         {CARDIO_TYPES.map((t) => (
-          <Button
-            key={t}
-            title={t}
-            color={t === workoutType ? "#208AEF" : undefined}
-            onPress={() => setWorkoutType(t)}
-          />
+          <Chip key={t} label={t} selected={t === workoutType} onPress={() => setWorkoutType(t)} color={accent} />
         ))}
       </View>
 
       <TextInput
         placeholder="Duration (minutes)"
+        placeholderTextColor={colors.textSecondary}
         keyboardType="numeric"
         value={durationMinutes}
         onChangeText={setDurationMinutes}
-        style={{ borderWidth: 1, padding: 12, borderRadius: 8 }}
+        style={inputStyle}
       />
       <TextInput
         placeholder="Distance (km)"
+        placeholderTextColor={colors.textSecondary}
         keyboardType="numeric"
         value={distanceKm}
         onChangeText={setDistanceKm}
-        style={{ borderWidth: 1, padding: 12, borderRadius: 8 }}
+        style={inputStyle}
       />
       <TextInput
         placeholder="Elevation gain (m, optional)"
+        placeholderTextColor={colors.textSecondary}
         keyboardType="numeric"
         value={elevationM}
         onChangeText={setElevationM}
-        style={{ borderWidth: 1, padding: 12, borderRadius: 8 }}
+        style={inputStyle}
       />
 
-      <Button title="Save Workout" onPress={save} />
-    </SafeAreaView>
+      <Button title="Save Workout" color={accent} onPress={save} />
+    </ScreenContainer>
   );
 }

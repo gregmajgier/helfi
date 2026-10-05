@@ -1,9 +1,17 @@
 import { apiFetch } from "@/lib/api-client";
 
-import type { FoodOut, MealEntry, MealEntryInput, PhotoEstimate } from "./types";
+import type { FoodCreateInput, FoodOut, MealEntry, MealEntryInput, PhotoEstimate } from "./types";
 
-export function searchFoods(query: string): Promise<FoodOut[]> {
-  return apiFetch<FoodOut[]>(`/meals/foods/search?q=${encodeURIComponent(query)}`);
+export function createCustomFood(food: FoodCreateInput): Promise<FoodOut> {
+  return apiFetch<FoodOut>("/meals/foods", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(food),
+  });
+}
+
+export function lookupBarcode(barcode: string): Promise<FoodOut> {
+  return apiFetch<FoodOut>(`/meals/foods/barcode/${encodeURIComponent(barcode)}`);
 }
 
 export function listEntriesForDay(day: string): Promise<MealEntry[]> {
@@ -41,5 +49,13 @@ export async function estimateFromPhoto(photoUri: string): Promise<PhotoEstimate
   return apiFetch<PhotoEstimate>("/meals/photo-estimate", {
     method: "POST",
     body: formData,
+  });
+}
+
+export function estimateFromDescription(description: string): Promise<PhotoEstimate> {
+  return apiFetch<PhotoEstimate>("/meals/estimate-from-description", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ description }),
   });
 }

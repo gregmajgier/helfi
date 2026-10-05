@@ -1,7 +1,9 @@
 import { useRouter } from "expo-router";
 import { useRef, useState } from "react";
-import { Button, FlatList, SafeAreaView, Text, TextInput, View } from "react-native";
+import { FlatList, Text, TextInput, View } from "react-native";
 
+import { Button, Card, Chip, ScreenContainer } from "@/components";
+import { useTheme } from "@/lib/theme";
 import { createWorkout, searchExercises } from "@/modules/training_tracker/api";
 import type { Exercise, WorkoutExercise, WorkoutType } from "@/modules/training_tracker/types";
 
@@ -19,6 +21,8 @@ type DraftExercise = {
 
 export default function LogStrengthScreen() {
   const router = useRouter();
+  const { colors, pillars, font, spacing } = useTheme();
+  const accent = pillars.move.light;
   const [workoutType, setWorkoutType] = useState<WorkoutType>("strength");
   const [durationMinutes, setDurationMinutes] = useState("");
   const [query, setQuery] = useState("");
@@ -26,6 +30,16 @@ export default function LogStrengthScreen() {
   const [draftExercises, setDraftExercises] = useState<DraftExercise[]>([]);
   const [error, setError] = useState<string | null>(null);
   const searchSeq = useRef(0);
+
+  const inputStyle = {
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.md,
+    borderRadius: 12,
+    fontFamily: font.regular,
+    color: colors.textPrimary,
+    backgroundColor: colors.surface,
+  } as const;
 
   const onSearch = async (text: string) => {
     setQuery(text);
@@ -92,70 +106,76 @@ export default function LogStrengthScreen() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, padding: 16, gap: 12 }}>
-      {error ? <Text style={{ color: "red" }}>{error}</Text> : null}
+    <ScreenContainer>
+      {error ? <Text style={{ color: colors.danger, fontFamily: font.regular }}>{error}</Text> : null}
 
-      <View style={{ flexDirection: "row", gap: 8 }}>
+      <View style={{ flexDirection: "row", gap: spacing.sm }}>
         {STRENGTH_TYPES.map((t) => (
-          <Button
-            key={t}
-            title={t}
-            color={t === workoutType ? "#208AEF" : undefined}
-            onPress={() => setWorkoutType(t)}
-          />
+          <Chip key={t} label={t} selected={t === workoutType} onPress={() => setWorkoutType(t)} color={accent} />
         ))}
       </View>
 
       <TextInput
         placeholder="Duration (minutes)"
+        placeholderTextColor={colors.textSecondary}
         keyboardType="numeric"
         value={durationMinutes}
         onChangeText={setDurationMinutes}
-        style={{ borderWidth: 1, padding: 12, borderRadius: 8 }}
+        style={inputStyle}
       />
 
       <TextInput
         placeholder="Search exercises"
+        placeholderTextColor={colors.textSecondary}
         value={query}
         onChangeText={onSearch}
-        style={{ borderWidth: 1, padding: 12, borderRadius: 8 }}
+        style={inputStyle}
       />
-      <FlatList
-        data={results}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <Button title={item.name} onPress={() => addExercise(item)} />}
-      />
+      {results.length > 0 ? (
+        <FlatList
+          data={results}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={{ gap: spacing.xs }}
+          renderItem={({ item }) => (
+            <Button title={item.name} variant="text" color={accent} onPress={() => addExercise(item)} />
+          )}
+        />
+      ) : null}
 
       <FlatList
         data={draftExercises}
         keyExtractor={(_, index) => String(index)}
+        style={{ flex: 1 }}
+        contentContainerStyle={{ gap: spacing.sm }}
         renderItem={({ item, index }) => (
-          <View style={{ paddingVertical: 8 }}>
-            <Text style={{ fontWeight: "600" }}>{item.exercise.name}</Text>
+          <Card>
+            <Text style={{ fontFamily: font.semibold, color: colors.textPrimary }}>{item.exercise.name}</Text>
             {item.sets.map((set, setIndex) => (
-              <View key={setIndex} style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
+              <View key={setIndex} style={{ flexDirection: "row", gap: spacing.sm, alignItems: "center" }}>
                 <TextInput
                   placeholder="reps"
+                  placeholderTextColor={colors.textSecondary}
                   keyboardType="numeric"
                   value={set.reps}
                   onChangeText={(text) => updateSet(index, setIndex, text, set.weight_kg)}
-                  style={{ borderWidth: 1, padding: 8, borderRadius: 8, width: 60 }}
+                  style={[inputStyle, { width: 70, padding: spacing.sm }]}
                 />
                 <TextInput
                   placeholder="kg"
+                  placeholderTextColor={colors.textSecondary}
                   keyboardType="numeric"
                   value={set.weight_kg}
                   onChangeText={(text) => updateSet(index, setIndex, set.reps, text)}
-                  style={{ borderWidth: 1, padding: 8, borderRadius: 8, width: 60 }}
+                  style={[inputStyle, { width: 70, padding: spacing.sm }]}
                 />
               </View>
             ))}
-            <Button title="Add Set" onPress={() => addSet(index)} />
-          </View>
+            <Button title="Add Set" variant="text" color={accent} onPress={() => addSet(index)} />
+          </Card>
         )}
       />
 
-      <Button title="Save Workout" onPress={save} />
-    </SafeAreaView>
+      <Button title="Save Workout" color={accent} onPress={save} />
+    </ScreenContainer>
   );
 }

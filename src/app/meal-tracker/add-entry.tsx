@@ -1,109 +1,86 @@
 import { useRouter, type Href } from "expo-router";
 import { useState } from "react";
-import { Button, FlatList, SafeAreaView, Text, TextInput, View } from "react-native";
+import { Text, TextInput, View } from "react-native";
 
-import { createEntry, searchFoods } from "@/modules/meal_tracker/api";
-import type { FoodOut, MealSlot } from "@/modules/meal_tracker/types";
+import { Button, Chip, ScreenContainer } from "@/components";
+import { useTheme } from "@/lib/theme";
+import type { MealSlot } from "@/modules/meal_tracker/types";
 
 const MEAL_SLOTS: MealSlot[] = ["breakfast", "lunch", "dinner", "snack"];
 
 export default function AddEntryScreen() {
   const router = useRouter();
-  const [query, setQuery] = useState("");
-  const [results, setResults] = useState<FoodOut[]>([]);
+  const { colors, pillars, font, spacing } = useTheme();
+  const accent = pillars.fuel.light;
   const [mealSlot, setMealSlot] = useState<MealSlot>("breakfast");
-  const [quickAddCalories, setQuickAddCalories] = useState("");
-  const [error, setError] = useState<string | null>(null);
-
-  const onSearch = async (text: string) => {
-    setQuery(text);
-    try {
-      setResults(text.length >= 2 ? await searchFoods(text) : []);
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "search failed");
-    }
-  };
-
-  const logFood = async (food: FoodOut) => {
-    try {
-      await createEntry({
-        meal_slot: mealSlot,
-        source: "search",
-        logged_at: new Date().toISOString(),
-        food_id: food.id,
-        calories: food.calories_per_serving,
-        protein_g: food.protein_g,
-        carbs_g: food.carbs_g,
-        fat_g: food.fat_g,
-      });
-      router.back();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "failed to log food");
-    }
-  };
-
-  const logQuickAdd = async () => {
-    const calories = Number(quickAddCalories);
-    if (!Number.isFinite(calories) || calories <= 0) return;
-    try {
-      await createEntry({
-        meal_slot: mealSlot,
-        source: "quick_add",
-        logged_at: new Date().toISOString(),
-        calories,
-        protein_g: 0,
-        carbs_g: 0,
-        fat_g: 0,
-      });
-      router.back();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "failed to log quick add");
-    }
-  };
+  const [description, setDescription] = useState("");
 
   return (
-    <SafeAreaView style={{ flex: 1, padding: 16, gap: 12 }}>
-      {error ? <Text style={{ color: "red" }}>{error}</Text> : null}
-      <View style={{ flexDirection: "row", gap: 8 }}>
+    <ScreenContainer>
+      <View style={{ flexDirection: "row", gap: spacing.sm, flexWrap: "wrap" }}>
         {MEAL_SLOTS.map((slot) => (
-          <Button
-            key={slot}
-            title={slot}
-            color={slot === mealSlot ? "#208AEF" : undefined}
-            onPress={() => setMealSlot(slot)}
-          />
+          <Chip key={slot} label={slot} selected={slot === mealSlot} onPress={() => setMealSlot(slot)} color={accent} />
         ))}
       </View>
 
+      <View style={{ flexDirection: "row", gap: spacing.sm }}>
+        <View style={{ flex: 1 }}>
+          <Button
+            title="Scan Barcode"
+            variant="secondary"
+            color={accent}
+            onPress={() => router.push({ pathname: "/meal-tracker/barcode-scanner", params: { mealSlot } } as Href)}
+          />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Button
+            title="Take a Photo"
+            variant="secondary"
+            color={accent}
+            onPress={() => router.push({ pathname: "/meal-tracker/camera", params: { mealSlot } } as Href)}
+          />
+        </View>
+      </View>
+
+      <Text style={{ fontFamily: font.semibold, fontSize: 14, color: colors.textSecondary }}>
+        Or describe what you ate
+      </Text>
+      <TextInput
+        placeholder="e.g. a bowl of oatmeal with banana and peanut butter"
+        placeholderTextColor={colors.textSecondary}
+        value={description}
+        onChangeText={setDescription}
+        multiline
+        style={{
+          borderWidth: 1,
+          borderColor: colors.border,
+          padding: spacing.md,
+          borderRadius: 12,
+          fontFamily: font.regular,
+          color: colors.textPrimary,
+          backgroundColor: colors.surface,
+          minHeight: 80,
+          textAlignVertical: "top",
+        }}
+      />
       <Button
-        title="Take a Photo"
-        onPress={() => router.push("/meal-tracker/camera" as Href)}
+        title="Estimate nutrition"
+        color={accent}
+        disabled={!description.trim()}
+        onPress={() =>
+          router.push({
+            pathname: "/meal-tracker/confirm-estimate",
+            params: { description: description.trim(), mealSlot },
+          } as Href)
+        }
       />
 
-      <TextInput
-        placeholder="Search foods"
-        value={query}
-        onChangeText={onSearch}
-        style={{ borderWidth: 1, padding: 12, borderRadius: 8 }}
+      <Button
+        title="Create custom food"
+        variant="text"
+        color={accent}
+        onPress={() => router.push({ pathname: "/meal-tracker/custom-food", params: { mealSlot } } as Href)}
       />
-      <FlatList
-        data={results}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <Button title={`${item.name} (${item.calories_per_serving} kcal)`} onPress={() => logFood(item)} />
-        )}
-      />
-
-      <Text>Quick add (calories only)</Text>
-      <TextInput
-        placeholder="e.g. 250"
-        keyboardType="numeric"
-        value={quickAddCalories}
-        onChangeText={setQuickAddCalories}
-        style={{ borderWidth: 1, padding: 12, borderRadius: 8 }}
-      />
-      <Button title="Log Quick Add" onPress={logQuickAdd} />
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }

@@ -1,6 +1,12 @@
 import { StyleSheet, View } from "react-native";
+import Animated, { useAnimatedStyle, withSpring } from "react-native-reanimated";
 
-import { useTheme } from "@/lib/theme";
+import { MOTION, useTheme } from "@/lib/theme";
+
+function Dot({ active, accent, idle }: { active: boolean; accent: string; idle: string }) {
+  const style = useAnimatedStyle(() => ({ width: withSpring(active ? 24 : 8, MOTION.spring) }));
+  return <Animated.View style={[styles.dot, { backgroundColor: active ? accent : idle }, style]} />;
+}
 
 export function ProgressDots({
   count,
@@ -17,13 +23,7 @@ export function ProgressDots({
   return (
     <View style={styles.row}>
       {Array.from({ length: count }, (_, i) => (
-        <View
-          key={i}
-          style={[
-            styles.dot,
-            { backgroundColor: i === activeIndex ? accent : colors.border, width: i === activeIndex ? 20 : 8 },
-          ]}
-        />
+        <Dot key={i} active={i === activeIndex} accent={accent} idle={colors.border} />
       ))}
     </View>
   );
@@ -31,5 +31,5 @@ export function ProgressDots({
 
 const styles = StyleSheet.create({
   row: { flexDirection: "row", gap: 6, justifyContent: "center" },
-  dot: { height: 8, borderRadius: 4 },
+  dot: { height: 8, borderRadius: 999 },
 });

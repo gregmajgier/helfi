@@ -56,10 +56,11 @@ goals are added. This only affects the *daily* Move ring — the weekly ring
 
 1. **Header row** (unchanged): "helf" wordmark + log out, as today.
 2. **View toggle**: segmented control, "Day" / "Week", local `viewMode` state.
-3. **Date nav**: `‹` / date label / `›`, stepping by one day or by one week
-   depending on `viewMode`. Label format: day → "Today" / "Yesterday" / full
-   date; week → "This week" / "Oct 28 – Nov 3". Clamped so you cannot
-   navigate into the future.
+3. **Date nav**: a `‹ date ›` row stepping by one day or by one week
+   depending on `viewMode`. Row label: day → "Today" / "Yesterday" / full
+   date; week → "This week" / "Oct 28 – Nov 3". The ring centre shows the
+   "Today" / "This week" label. `›` is disabled once the range reaches the
+   present, so you cannot navigate into the future.
 4. **Ring cluster**: new `RingCluster` component — four concentric
    `react-native-svg` circles (outer→inner: Move, Fuel, Mind, Focus), each
    stroked in its pillar color via `stroke-dasharray`/`stroke-dashoffset` for
@@ -99,12 +100,9 @@ from older docs/training data.
 
 ## Visual direction
 
-Apply the existing pillar palette (`src/lib/theme.ts`) to rings/cards/stats;
-no new colors introduced. Use the `frontend-design` skill when building
-`RingCluster`, `StatTile`, and the evolved `PillarTile` card to land on
-spacing/shadow/typography details that read as intentional rather than
-default — this is the "use taste skills to make the project more vibrant"
-ask from the review doc, scoped to this screen.
+Superseded by `2026-10-04-design-system-v2-design.md` (palette, radius/shadow/
+motion tokens, Phosphor pillar icons, `AnimatedPressable`). `RingCluster`,
+`StatTile` and the pillar cards are built on those tokens.
 
 ## Error handling
 

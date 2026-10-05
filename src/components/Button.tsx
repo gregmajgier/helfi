@@ -1,6 +1,8 @@
-import { Pressable, StyleSheet, Text } from "react-native";
+import { StyleSheet, Text } from "react-native";
 
-import { useTheme } from "@/lib/theme";
+import { accentShadow, onAccent, tint, useTheme } from "@/lib/theme";
+
+import { AnimatedPressable } from "./AnimatedPressable";
 
 type ButtonVariant = "primary" | "secondary" | "text";
 
@@ -17,36 +19,28 @@ export function Button({
   color?: string;
   disabled?: boolean;
 }) {
-  const { colors, font, spacing } = useTheme();
+  const { colors, font, spacing, radius } = useTheme();
   const accent = color ?? colors.textPrimary;
 
   const backgroundColor =
-    variant === "primary" ? accent : variant === "secondary" ? colors.surface : "transparent";
-  const textColor = variant === "primary" ? (color ? "#FFFFFF" : colors.background) : accent;
+    variant === "primary" ? accent : variant === "secondary" ? tint(accent, 0.14) : "transparent";
+  const textColor = variant === "primary" ? (color ? onAccent(color) : colors.background) : accent;
 
   return (
-    <Pressable
+    <AnimatedPressable
       onPress={onPress}
       disabled={disabled}
-      style={({ pressed }) => [
+      style={[
         styles.base,
-        {
-          backgroundColor,
-          borderColor: accent,
-          borderWidth: variant === "secondary" ? 1.5 : 0,
-          paddingVertical: spacing.md,
-          paddingHorizontal: spacing.lg,
-          opacity: disabled ? 0.5 : pressed ? 0.8 : 1,
-        },
+        { backgroundColor, borderRadius: radius.md, paddingHorizontal: spacing.lg },
+        variant === "primary" && color ? accentShadow(color) : null,
       ]}
     >
-      <Text style={{ color: textColor, fontFamily: font.semibold, fontSize: 16, textAlign: "center" }}>
-        {title}
-      </Text>
-    </Pressable>
+      <Text style={{ color: textColor, fontFamily: font.bold, fontSize: 16, textAlign: "center" }}>{title}</Text>
+    </AnimatedPressable>
   );
 }
 
 const styles = StyleSheet.create({
-  base: { borderRadius: 14, alignItems: "center", justifyContent: "center" },
+  base: { minHeight: 52, alignItems: "center", justifyContent: "center" },
 });

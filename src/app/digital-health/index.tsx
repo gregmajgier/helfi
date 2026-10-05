@@ -64,7 +64,7 @@ export default function DigitalHealthRoute() {
     <ScreenContainer>
       <ScrollView contentContainerStyle={{ gap: spacing.md }}>
         <Text style={{ fontFamily: font.extrabold, fontSize: 24, color: colors.textPrimary }}>Focus</Text>
-        {error ? <Text style={{ color: "#C0392B" }}>{error}</Text> : null}
+        {error ? <Text style={{ color: colors.danger }}>{error}</Text> : null}
 
         <Card style={{ borderColor: accent, borderWidth: 1.5 }}>
           <Text style={{ fontFamily: font.semibold, fontSize: 14, color: colors.textPrimary }}>
@@ -72,7 +72,7 @@ export default function DigitalHealthRoute() {
           </Text>
           <Text style={{ fontFamily: font.regular, fontSize: 13, color: colors.textSecondary }}>
             You can set up rules now. Actually blocking apps on a schedule needs a deeper platform
-            integration we haven't shipped yet — your rules are saved and ready for when it lands.
+            integration we haven&apos;t shipped yet — your rules are saved and ready for when it lands.
           </Text>
         </Card>
 
@@ -96,7 +96,7 @@ export default function DigitalHealthRoute() {
                 {rule.apps_or_categories.join(", ")}
                 {rule.daily_limit_minutes ? ` · ${rule.daily_limit_minutes} min/day` : ""}
               </Text>
-              <Button title="Delete" variant="text" color="#C0392B" onPress={() => removeRule(rule)} />
+              <Button title="Delete" variant="text" color={colors.danger} onPress={() => removeRule(rule)} />
             </Card>
           ))
         )}

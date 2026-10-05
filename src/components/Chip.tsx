@@ -1,6 +1,8 @@
-import { Pressable, StyleSheet, Text } from "react-native";
+import { Text } from "react-native";
 
-import { useTheme } from "@/lib/theme";
+import { onAccent, tint, useTheme } from "@/lib/theme";
+
+import { AnimatedPressable } from "./AnimatedPressable";
 
 export function Chip({
   label,
@@ -13,30 +15,28 @@ export function Chip({
   onPress: () => void;
   color?: string;
 }) {
-  const { colors, font, spacing } = useTheme();
+  const { colors, font, spacing, radius } = useTheme();
   const accent = color ?? colors.textPrimary;
 
   return (
-    <Pressable
+    <AnimatedPressable
       onPress={onPress}
-      style={({ pressed }) => [
-        styles.base,
-        {
-          backgroundColor: selected ? accent : colors.surface,
-          borderColor: accent,
-          paddingVertical: spacing.sm,
-          paddingHorizontal: spacing.lg,
-          opacity: pressed ? 0.85 : 1,
-        },
-      ]}
+      style={{
+        backgroundColor: selected ? accent : tint(accent, 0.12),
+        borderRadius: radius.pill,
+        paddingVertical: spacing.sm + 2,
+        paddingHorizontal: spacing.lg,
+      }}
     >
-      <Text style={{ color: selected ? "#FFFFFF" : accent, fontFamily: font.medium, fontSize: 14 }}>
+      <Text
+        style={{
+          color: selected ? (color ? onAccent(color) : colors.background) : accent,
+          fontFamily: font.semibold,
+          fontSize: 14,
+        }}
+      >
         {label}
       </Text>
-    </Pressable>
+    </AnimatedPressable>
   );
 }
-
-const styles = StyleSheet.create({
-  base: { borderRadius: 999, borderWidth: 1.5 },
-});

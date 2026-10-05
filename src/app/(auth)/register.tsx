@@ -90,6 +90,7 @@ export default function RegisterScreen() {
     >
       <TextInput
         placeholder="Email"
+        placeholderTextColor={colors.textSecondary}
         autoCapitalize="none"
         keyboardType="email-address"
         value={email}
@@ -101,10 +102,12 @@ export default function RegisterScreen() {
           borderRadius: 12,
           fontFamily: font.regular,
           color: colors.textPrimary,
+          backgroundColor: colors.surface,
         }}
       />
       <TextInput
         placeholder="Password"
+        placeholderTextColor={colors.textSecondary}
         secureTextEntry
         value={password}
         onChangeText={setPassword}
@@ -115,9 +118,10 @@ export default function RegisterScreen() {
           borderRadius: 12,
           fontFamily: font.regular,
           color: colors.textPrimary,
+          backgroundColor: colors.surface,
         }}
       />
-      {error ? <Text style={{ color: "#C0392B" }}>{error}</Text> : null}
+      {error ? <Text style={{ color: colors.danger }}>{error}</Text> : null}
       <Button title="Register" onPress={onSubmit} />
       <Button title="Already have an account? Log in" variant="text" onPress={() => router.push("/login" as Href)} />
     </View>

@@ -13,6 +13,7 @@ const PENDING_KEY = "helf.onboarding.pending_answers";
 const COMPLETE_KEY = "helf.onboarding.complete";
 const MOVE_GOAL_KEY = "helf.onboarding.move_goal_per_week";
 const FUEL_GOAL_KEY = "helf.onboarding.fuel_goal";
+const DAILY_CALORIE_GOAL_KEY = "helf.fuel.daily_calorie_goal";
 
 export async function getPendingAnswers(): Promise<OnboardingAnswers> {
   const raw = await AsyncStorage.getItem(PENDING_KEY);
@@ -54,4 +55,13 @@ export async function getFuelGoal(): Promise<FuelGoal | null> {
 
 export async function setFuelGoal(value: FuelGoal): Promise<void> {
   await AsyncStorage.setItem(FUEL_GOAL_KEY, value);
+}
+
+export async function getDailyCalorieGoal(): Promise<number | null> {
+  const raw = await AsyncStorage.getItem(DAILY_CALORIE_GOAL_KEY);
+  return raw ? Number(raw) : null;
+}
+
+export async function setDailyCalorieGoal(value: number): Promise<void> {
+  await AsyncStorage.setItem(DAILY_CALORIE_GOAL_KEY, String(value));
 }
