@@ -4,6 +4,7 @@ import httpx
 from fastapi import APIRouter, Depends, HTTPException, Path, UploadFile, status
 
 from ..deps import get_current_user_id, get_food_repo, get_meal_entry_repo
+from ..ratelimit import estimate_limiter
 from .models import (
     FoodCreate,
     FoodOut,
@@ -128,6 +129,7 @@ async def photo_estimate(
     photo: UploadFile,
     user_id: str = Depends(get_current_user_id),
 ):
+    estimate_limiter.check(user_id)
     content_type = photo.content_type or "image/jpeg"
     if content_type not in ALLOWED_IMAGE_TYPES:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="unsupported image type")
@@ -143,6 +145,7 @@ async def estimate_from_description(
     body: MealDescriptionIn,
     user_id: str = Depends(get_current_user_id),
 ):
+    estimate_limiter.check(user_id)
     if not body.description.strip():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="description is required")
     estimator = get_nutrition_estimator()

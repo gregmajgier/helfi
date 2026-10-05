@@ -134,3 +134,15 @@ def test_barcode_lookup_rejects_non_numeric_barcode(client, auth_headers):
 
     assert response.status_code in (404, 422)
     assert client.get("/meals/foods/barcode/abc123", headers=headers).status_code == 422
+
+
+def test_estimate_from_description_is_rate_limited(client, auth_headers):
+    headers = auth_headers()
+
+    codes = [
+        client.post("/meals/estimate-from-description", json={"description": "an apple"}, headers=headers).status_code
+        for _ in range(31)
+    ]
+
+    assert codes[-1] == 429
+    assert 429 not in codes[:-1]

@@ -57,3 +57,12 @@ def auth_headers(client):
         return {"Authorization": f"Bearer {token}"}
 
     return _make
+
+
+@pytest.fixture(autouse=True)
+def _reset_rate_limiters():
+    from app.ratelimit import estimate_limiter
+
+    estimate_limiter.reset()
+    yield
+    estimate_limiter.reset()
