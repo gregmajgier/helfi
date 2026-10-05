@@ -1,6 +1,7 @@
 # Native Screen-Time Tracking - Design Spec
 
-Status: Draft, decisions taken as recommended (autonomous, 2026-10-05)
+Status: Milestones 1-3 implemented on `feat/screen-time`; milestone 4 is documented in
+[ios-screen-time-setup.md](../ios-screen-time-setup.md) and waits for Apple. See "Implementation decisions" at the end.
 Owner: gregmajgier@gmail.com
 Depends on: [Today dashboard](2026-10-04-dashboard-layout-design.md), [Digital health](2026-09-16-digital-health-design.md)
 Source: `review-01.md`, `remaining-work.md` section 1
@@ -156,3 +157,56 @@ Extend `backend/app/screentime` (today it stores rules only):
 - Whether to count helf's own foreground time (default: excluded).
 - A tighter iOS accuracy tier (5-minute thresholds) if the extension's event
   limits allow it.
+
+## Implementation decisions (2026-10-05, autonomous; they override the text above where they differ)
+
+1. **Budget is stored on the device, not the backend.** The spec said "existing user settings", but the calorie and
+   move goals live in AsyncStorage (`src/lib/onboarding-store.ts`) and the backend has no settings store. The budget
+   follows that pattern: `src/modules/screen_time/settings.ts`, key `helf.focus.daily_budget_minutes`, default 120,
+   clamped to 15-720 in 15-minute steps. No `focus_budget_minutes` field exists in the API. Why: adding a user-settings
+   endpoint is a separate cross-cutting change, and the ring is computed on the device anyway. Revisit when goals sync.
+2. **Date validation allows tomorrow.** `PUT /screentime/usage/{date}` rejects dates more than one day ahead of the
+   server's UTC date, not any future date, because a user's local day can be ahead of UTC by up to 14 hours.
+3. **The usage limiter lives in `screentime/router.py`.** It reuses `SlidingWindowLimiter` (60/hour per user) but is a
+   separate instance, so `app/ratelimit.py` stays untouched. `tests/conftest.py` resets it per test. Limits are
+   per replica, same as the estimate limiter.
+4. **Interval summing is TypeScript, not Kotlin.** The native module only returns raw `UsageEvents` (foreground,
+   background, stopped, screen off, shutdown). `sumForegroundIntervals` in `foreground.ts` does the summing, and
+   jest covers it with 16 fixtures. Why: this machine has no JDK or Android SDK, so Kotlin unit tests could not be
+   run, and one tested implementation beats a Kotlin copy kept in sync by hand. Event volume per day is small
+   (hundreds to a few thousand, capped at 50,000).
+5. **Midnight and open intervals.** An app already open at the start of the window is credited from the window start
+   only when the first event is its background event. An interval still open at the end is closed at
+   `min(window end, now)`.
+6. **Always ignored on Android:** helf itself, `com.android.systemui` and every HOME (launcher) package. They count in
+   neither the total nor the dumb minutes. Excluded (productive) apps count in the total only.
+7. **No `usage.web.ts`.** `usage.ts` is the default provider (unavailable), used by web, jest and tsc. Metro picks
+   `usage.android.ts` or `usage.ios.ts` on device.
+8. **Permission manifest.** `PACKAGE_USAGE_STATS` and the package-visibility `<queries>` live in the module's own
+   `AndroidManifest.xml`, so the Gradle manifest merger adds them and `app.json` needs no change. `QUERY_ALL_PACKAGES`
+   is deliberately not used (Play restricts it). The JS side uses `requireOptionalNativeModule`, so Expo Go shows
+   "unavailable" instead of crashing.
+9. **Focus numbers.**
+   - Week mode averages the per-day percents over days that have data; days without data are ignored, not counted as
+     perfect or empty.
+   - The stat tile is the sum of dumb hours in the range, one decimal.
+   - The card reads `1h 20m of 2h budget` (day) or `1h 20m avg of 2h budget` (week).
+   - With permission granted but no data: ring untracked, card `No screen-time data yet`.
+   - Without permission: `Set up screen-time tracking`.
+10. **Default excluded apps** are only those whose `ApplicationInfo.category` is productivity or maps. Education and
+    health and fitness have no such category on Android, so the user picks them. The default set is offered the first
+    time the picker opens; nothing is saved until the user presses Save.
+11. **Today comes from the device, past days from the backend.** The dashboard reads today's value live from the
+    provider so it is never 15 minutes stale. Past days use synced records. Sync runs when the dashboard mounts and on
+    every foreground, throttled to 15 minutes, and also uploads yesterday once per day so it ends final. Failures are
+    silent and do not record a sync time, so they retry on the next trigger. Sync only runs while the home screen is
+    mounted; a background task is future work.
+12. **iOS bundle ID** `com.gregmajgier.helf` is a proposal in the iOS doc, not applied to `app.json`.
+
+## Not verified here
+
+- Kotlin was written but not compiled or run: no JDK or Android SDK on this machine. `expo prebuild --platform
+  android` succeeds in a scratch copy and autolinking resolves `expo.modules.screentime.ScreenTimeModule`, but the
+  Gradle build, manifest merge and runtime behaviour need a dev build on a physical Android device.
+- Usage Access flow, the excluded-apps picker and real totals need that device pass.
+- iOS is entirely unbuilt.
