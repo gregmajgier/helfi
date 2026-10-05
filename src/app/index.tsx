@@ -9,6 +9,7 @@ import { useTheme } from "@/lib/theme";
 import { rangeFor } from "@/modules/dashboard/summary";
 import type { ViewMode } from "@/modules/dashboard/types";
 import { useDashboardSummary } from "@/modules/dashboard/useDashboardSummary";
+import { useScreenTimeSync } from "@/modules/screen_time";
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -37,6 +38,7 @@ export default function Home() {
   const [mode, setMode] = useState<ViewMode>("day");
   const [anchor, setAnchor] = useState(() => new Date());
   const { summary, reload } = useDashboardSummary(anchor, mode, !!user);
+  useScreenTimeSync(!!user);
 
   useFocusEffect(
     useCallback(() => {
@@ -111,7 +113,7 @@ export default function Home() {
         <View style={{ flexDirection: "row", gap: spacing.sm }}>
           <StatTile index={0} value={stats?.caloriePercent == null ? "-" : `${stats.caloriePercent}%`} label="Calorie goal" />
           <StatTile index={1} value={stats ? `${stats.trainingHours}h` : "-"} label="Trained" />
-          <StatTile index={2} value="-" label="Screen time" />
+          <StatTile index={2} value={stats?.screenTimeHours == null ? "-" : `${stats.screenTimeHours}h`} label="Screen time" />
           <StatTile index={3} value={stats?.rating == null ? "-" : `${stats.rating}/5`} label={timeUnit} />
         </View>
 

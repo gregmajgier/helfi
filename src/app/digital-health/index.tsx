@@ -6,6 +6,7 @@ import { Button, Card, ScreenContainer } from "@/components";
 import { useTheme } from "@/lib/theme";
 import { deleteScreenTimeRule, listScreenTimeRules, updateScreenTimeRule } from "@/modules/digital_health/api";
 import type { ScreenTimeRule } from "@/modules/digital_health/types";
+import { ScreenTimeSection } from "@/modules/screen_time/ScreenTimeSection";
 
 export default function DigitalHealthRoute() {
   const router = useRouter();
@@ -65,6 +66,8 @@ export default function DigitalHealthRoute() {
       <ScrollView contentContainerStyle={{ gap: spacing.md }}>
         <Text style={{ fontFamily: font.extrabold, fontSize: 24, color: colors.textPrimary }}>Focus</Text>
         {error ? <Text style={{ color: colors.danger }}>{error}</Text> : null}
+
+        <ScreenTimeSection />
 
         <Card style={{ borderColor: accent, borderWidth: 1.5 }}>
           <Text style={{ fontFamily: font.semibold, fontSize: 14, color: colors.textPrimary }}>
