@@ -1,18 +1,25 @@
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
 
 import httpx
-from fastapi import APIRouter, Depends, HTTPException, Path, UploadFile, status
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, UploadFile, status
 
-from ..deps import get_current_user_id, get_food_repo, get_meal_entry_repo
+from ..deps import get_current_user_id, get_favorite_repo, get_food_repo, get_meal_entry_repo
 from ..ratelimit import estimate_limiter
+from . import nutrition
 from .models import (
+    NUTRIENT_FIELDS,
+    CopyEntriesIn,
+    DayTotals,
     FoodCreate,
     FoodOut,
+    FoodUpdate,
+    LogFoodIn,
     MealDescriptionIn,
     MealEntryCreate,
     MealEntryOut,
     MealEntryUpdate,
     PhotoEstimateOut,
+    StatsOut,
 )
 from .nutrition_estimator import get_nutrition_estimator
 
@@ -32,6 +39,73 @@ async def create_custom_food(
     data = body.model_dump()
     data.pop("barcode", None)
     return await food_repo.create({**data, "barcode": None, "created_by_user_id": user_id})
+
+
+MAX_STATS_DAYS = 92
+MAX_COPY_ENTRIES = 100
+RECENT_WINDOW_DAYS = 60
+MAX_FAVORITES = 200
+
+
+async def _accessible_food(food_repo, food_id: str, user_id: str) -> dict:
+    food = await food_repo.get(food_id)
+    if not food or food.get("created_by_user_id") not in (None, user_id):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="food not found")
+    return food
+
+
+@router.get("/foods/search", response_model=list[FoodOut])
+async def search_foods(
+    q: str = Query(min_length=2, max_length=80),
+    user_id: str = Depends(get_current_user_id),
+    food_repo=Depends(get_food_repo),
+):
+    return await food_repo.search(q, user_id)
+
+
+@router.get("/foods/mine", response_model=list[FoodOut])
+async def list_my_foods(
+    user_id: str = Depends(get_current_user_id),
+    food_repo=Depends(get_food_repo),
+):
+    return await food_repo.list_for_user(user_id)
+
+
+@router.get("/foods/favorites", response_model=list[FoodOut])
+async def list_favorites(
+    user_id: str = Depends(get_current_user_id),
+    food_repo=Depends(get_food_repo),
+    favorite_repo=Depends(get_favorite_repo),
+):
+    favorites = await favorite_repo.list_for_user(user_id, field="created_at")
+    foods = []
+    for favorite in reversed(favorites):
+        food = await food_repo.get(favorite["food_id"])
+        if food and food.get("created_by_user_id") in (None, user_id):
+            foods.append(food)
+    return foods
+
+
+@router.put("/foods/{food_id}/favorite", status_code=status.HTTP_204_NO_CONTENT)
+async def add_favorite(
+    food_id: str,
+    user_id: str = Depends(get_current_user_id),
+    food_repo=Depends(get_food_repo),
+    favorite_repo=Depends(get_favorite_repo),
+):
+    await _accessible_food(food_repo, food_id, user_id)
+    if len(await favorite_repo.list_for_user(user_id)) >= MAX_FAVORITES:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="too many favorites")
+    await favorite_repo.put({"id": f"{user_id}:{food_id}", "user_id": user_id, "food_id": food_id})
+
+
+@router.delete("/foods/{food_id}/favorite", status_code=status.HTTP_204_NO_CONTENT)
+async def remove_favorite(
+    food_id: str,
+    user_id: str = Depends(get_current_user_id),
+    favorite_repo=Depends(get_favorite_repo),
+):
+    await favorite_repo.delete(user_id, f"{user_id}:{food_id}")
 
 
 OPEN_FOOD_FACTS_URL = "https://world.openfoodfacts.org/api/v2/product/{barcode}.json"
@@ -72,10 +146,54 @@ async def lookup_barcode(
         "protein_g": nutriments.get("proteins_100g", 0) or 0,
         "carbs_g": nutriments.get("carbohydrates_100g", 0) or 0,
         "fat_g": nutriments.get("fat_100g", 0) or 0,
+        "fiber_g": nutriments.get("fiber_100g", 0) or 0,
+        "sugar_g": nutriments.get("sugars_100g", 0) or 0,
+        "saturated_fat_g": nutriments.get("saturated-fat_100g", 0) or 0,
+        # Open Food Facts reports sodium in grams per 100 g.
+        "sodium_mg": round((nutriments.get("sodium_100g", 0) or 0) * 1000, 1),
         "barcode": barcode,
         "created_by_user_id": None,
     }
     return await food_repo.create(food)
+
+
+@router.get("/foods/{food_id}", response_model=FoodOut)
+async def get_food(
+    food_id: str,
+    user_id: str = Depends(get_current_user_id),
+    food_repo=Depends(get_food_repo),
+):
+    return await _accessible_food(food_repo, food_id, user_id)
+
+
+@router.patch("/foods/{food_id}", response_model=FoodOut)
+async def update_custom_food(
+    food_id: str,
+    body: FoodUpdate,
+    user_id: str = Depends(get_current_user_id),
+    food_repo=Depends(get_food_repo),
+):
+    updates = {k: v for k, v in body.model_dump().items() if v is not None}
+    updated = await food_repo.update(food_id, user_id, updates)
+    if not updated:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="food not found")
+    return updated
+
+
+@router.delete("/foods/{food_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_custom_food(
+    food_id: str,
+    user_id: str = Depends(get_current_user_id),
+    food_repo=Depends(get_food_repo),
+    favorite_repo=Depends(get_favorite_repo),
+):
+    if not await food_repo.delete(food_id, user_id):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="food not found")
+    await favorite_repo.delete(user_id, f"{user_id}:{food_id}")
+
+
+def _entry_day(entry: dict) -> str:
+    return entry.get("day") or entry["logged_at"][:10]
 
 
 @router.post("/entries", response_model=MealEntryOut, status_code=status.HTTP_201_CREATED)
@@ -84,7 +202,34 @@ async def create_entry(
     user_id: str = Depends(get_current_user_id),
     meal_entry_repo=Depends(get_meal_entry_repo),
 ):
-    return await meal_entry_repo.create({**body.model_dump(mode="json"), "user_id": user_id})
+    data = body.model_dump(mode="json")
+    data["day"] = data["day"] or data["logged_at"][:10]
+    return await meal_entry_repo.create({**data, "user_id": user_id})
+
+
+@router.post("/entries/from-food", response_model=MealEntryOut, status_code=status.HTTP_201_CREATED)
+async def log_food(
+    body: LogFoodIn,
+    user_id: str = Depends(get_current_user_id),
+    food_repo=Depends(get_food_repo),
+    meal_entry_repo=Depends(get_meal_entry_repo),
+):
+    food = await _accessible_food(food_repo, body.food_id, user_id)
+    logged_at = body.logged_at or datetime.now(timezone.utc)
+    source = "custom" if food.get("created_by_user_id") else ("barcode" if food.get("barcode") else "search")
+    entry = {
+        "user_id": user_id,
+        "meal_slot": body.meal_slot,
+        "source": source,
+        "logged_at": logged_at.isoformat(),
+        "day": body.day.isoformat(),
+        "food_id": food["id"],
+        "name": food["name"],
+        "amount": body.amount,
+        "unit": food["serving_unit"],
+        **nutrition.nutrients_for_amount(food, body.amount),
+    }
+    return await meal_entry_repo.create(entry)
 
 
 @router.get("/entries", response_model=list[MealEntryOut])
@@ -96,6 +241,92 @@ async def list_entries(
     return await meal_entry_repo.list_for_day(user_id, day)
 
 
+@router.post("/entries/copy", response_model=list[MealEntryOut], status_code=status.HTTP_201_CREATED)
+async def copy_entries(
+    body: CopyEntriesIn,
+    user_id: str = Depends(get_current_user_id),
+    meal_entry_repo=Depends(get_meal_entry_repo),
+):
+    source = await meal_entry_repo.list_for_day(user_id, body.from_day)
+    if body.from_slot:
+        source = [e for e in source if e["meal_slot"] == body.from_slot]
+    if len(source) > MAX_COPY_ENTRIES:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="too many entries to copy")
+    copies = []
+    for entry in source:
+        clone = {
+            k: v
+            for k, v in entry.items()
+            if k not in ("id", "created_at", "updated_at")
+        }
+        clone["day"] = body.to_day.isoformat()
+        clone["logged_at"] = f"{body.to_day.isoformat()}{entry['logged_at'][10:]}"
+        if body.to_slot:
+            clone["meal_slot"] = body.to_slot
+        copies.append(await meal_entry_repo.create(clone))
+    return copies
+
+
+@router.get("/entries/recent", response_model=list[MealEntryOut])
+async def recent_entries(
+    limit: int = Query(default=20, ge=1, le=50),
+    today: date | None = None,
+    user_id: str = Depends(get_current_user_id),
+    meal_entry_repo=Depends(get_meal_entry_repo),
+):
+    """Most recently logged distinct foods, newest first, for one-tap re-logging."""
+    end = today or datetime.now(timezone.utc).date()
+    entries = await meal_entry_repo.list_range(user_id, end - timedelta(days=RECENT_WINDOW_DAYS), end)
+    seen, recent = set(), []
+    for entry in sorted(entries, key=lambda e: e["logged_at"], reverse=True):
+        if not entry.get("name"):
+            continue
+        key = entry.get("food_id") or entry["name"].lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        recent.append(entry)
+        if len(recent) >= limit:
+            break
+    return recent
+
+
+@router.get("/entries/stats", response_model=StatsOut)
+async def entry_stats(
+    start: date,
+    end: date,
+    user_id: str = Depends(get_current_user_id),
+    meal_entry_repo=Depends(get_meal_entry_repo),
+):
+    if end < start or (end - start).days >= MAX_STATS_DAYS:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="invalid date range")
+    entries = await meal_entry_repo.list_range(user_id, start, end)
+    by_day: dict[str, dict] = {}
+    for entry in entries:
+        bucket = by_day.setdefault(_entry_day(entry), {**nutrition.empty(), "entries": 0})
+        for field in NUTRIENT_FIELDS:
+            bucket[field] += float(entry.get(field, 0) or 0)
+        bucket["entries"] += 1
+    days = []
+    cursor = start
+    while cursor <= end:
+        bucket = by_day.get(cursor.isoformat(), {**nutrition.empty(), "entries": 0})
+        days.append(DayTotals(day=cursor, **{k: round(v, 1) for k, v in bucket.items()}))
+        cursor += timedelta(days=1)
+    logged = [d for d in days if d.entries > 0]
+    n = len(logged) or 1
+    return StatsOut(
+        start=start,
+        end=end,
+        days=days,
+        logged_days=len(logged),
+        average_calories=round(sum(d.calories for d in logged) / n, 1),
+        average_protein_g=round(sum(d.protein_g for d in logged) / n, 1),
+        average_carbs_g=round(sum(d.carbs_g for d in logged) / n, 1),
+        average_fat_g=round(sum(d.fat_g for d in logged) / n, 1),
+    )
+
+
 @router.patch("/entries/{entry_id}", response_model=MealEntryOut)
 async def update_entry(
     entry_id: str,
@@ -104,6 +335,16 @@ async def update_entry(
     meal_entry_repo=Depends(get_meal_entry_repo),
 ):
     updates = {k: v for k, v in body.model_dump().items() if v is not None}
+    if "amount" in updates:
+        current = await meal_entry_repo.get(user_id, entry_id)
+        if not current:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="entry not found")
+        old_amount = current.get("amount")
+        if not old_amount:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="entry has no amount to scale")
+        scaled = nutrition.scale(current, updates["amount"] / old_amount)
+        # Explicit nutrient values in the same request win over the scaled ones.
+        updates = {**scaled, **updates}
     updated = await meal_entry_repo.update(user_id, entry_id, updates)
     if not updated:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="entry not found")
