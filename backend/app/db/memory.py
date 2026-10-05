@@ -281,3 +281,28 @@ class InMemoryScreenTimeRuleRepository:
             return False
         del self._rules[rule["id"]]
         return True
+
+
+class InMemoryScreenTimeUsageRepository:
+    def __init__(self):
+        self._records: dict[tuple[str, str], dict] = {}
+
+    async def upsert(self, user_id: str, day: date, total_minutes: int, dumb_minutes: int) -> dict:
+        record = {
+            "id": f"usage-{day.isoformat()}",
+            "user_id": user_id,
+            "date": day.isoformat(),
+            "total_minutes": total_minutes,
+            "dumb_minutes": dumb_minutes,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+        }
+        self._records[(user_id, record["date"])] = record
+        return dict(record)
+
+    async def list_range(self, user_id: str, start: date, end: date) -> list[dict]:
+        results = [
+            dict(r)
+            for (uid, d), r in self._records.items()
+            if uid == user_id and start.isoformat() <= d <= end.isoformat()
+        ]
+        return sorted(results, key=lambda r: r["date"])

@@ -53,6 +53,9 @@ async def init_cosmos(client: CosmosClient, database_name: str) -> None:
     await database.create_container_if_not_exists(
         id="screentime_rules", partition_key=PartitionKey(path="/user_id")
     )
+    await database.create_container_if_not_exists(
+        id="screentime_usage", partition_key=PartitionKey(path="/user_id")
+    )
     await _seed_exercises(exercises_container)
     await _seed_foods(foods_container)
 
@@ -430,3 +433,38 @@ class CosmosScreenTimeRuleRepository:
             return False
         await self._container().delete_item(item=rule_id, partition_key=user_id)
         return True
+
+
+class CosmosScreenTimeUsageRepository:
+    def __init__(self, client: CosmosClient, database_name: str):
+        self._client = client
+        self._database_name = database_name
+
+    def _container(self):
+        return self._client.get_database_client(self._database_name).get_container_client("screentime_usage")
+
+    async def upsert(self, user_id: str, day: date, total_minutes: int, dumb_minutes: int) -> dict:
+        record = {
+            "id": f"usage-{day.isoformat()}",
+            "user_id": user_id,
+            "date": day.isoformat(),
+            "total_minutes": total_minutes,
+            "dumb_minutes": dumb_minutes,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+        }
+        await self._container().upsert_item(record)
+        return record
+
+    async def list_range(self, user_id: str, start: date, end: date) -> list[dict]:
+        container = self._container()
+        query = "SELECT * FROM c WHERE c.user_id = @user_id AND c.date >= @start AND c.date <= @end"
+        params = [
+            {"name": "@user_id", "value": user_id},
+            {"name": "@start", "value": start.isoformat()},
+            {"name": "@end", "value": end.isoformat()},
+        ]
+        items = [
+            item
+            async for item in container.query_items(query=query, parameters=params, partition_key=user_id)
+        ]
+        return sorted(items, key=lambda r: r["date"])

@@ -9,6 +9,7 @@ from app.db.memory import (
     InMemoryMealEntryRepository,
     InMemoryMoodEntryRepository,
     InMemoryScreenTimeRuleRepository,
+    InMemoryScreenTimeUsageRepository,
     InMemoryUserRepository,
     InMemoryWorkoutRepository,
 )
@@ -202,3 +203,17 @@ async def test_screentime_rule_repository_crud_scoped_by_user():
     assert await repo.delete("user-2", rule["id"]) is False
     assert await repo.delete("user-1", rule["id"]) is True
     assert await repo.get("user-1", rule["id"]) is None
+
+
+async def test_screentime_usage_repository_upsert_and_range_scoped_by_user():
+    repo = InMemoryScreenTimeUsageRepository()
+
+    first = await repo.upsert("user-1", date(2026, 10, 1), 100, 40)
+    await repo.upsert("user-1", date(2026, 10, 1), 120, 50)
+    await repo.upsert("user-1", date(2026, 10, 3), 10, 5)
+    await repo.upsert("user-2", date(2026, 10, 1), 999, 999)
+
+    assert first["id"] == "usage-2026-10-01"
+    rows = await repo.list_range("user-1", date(2026, 10, 1), date(2026, 10, 2))
+    assert [(r["date"], r["total_minutes"], r["dumb_minutes"]) for r in rows] == [("2026-10-01", 120, 50)]
+    assert len(await repo.list_range("user-1", date(2026, 10, 1), date(2026, 10, 3))) == 2

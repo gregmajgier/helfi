@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, model_validator, field_validator
 
 
 class ScreenTimeRuleCreate(BaseModel):
@@ -56,4 +56,22 @@ class ScreenTimeRuleOut(ScreenTimeRuleCreate):
     id: str
     user_id: str
     created_at: str
+    updated_at: str
+
+
+class ScreenTimeUsageUpsert(BaseModel):
+    total_minutes: int = Field(ge=0, le=1440)
+    dumb_minutes: int = Field(ge=0, le=1440)
+
+    @model_validator(mode="after")
+    def dumb_within_total(self) -> "ScreenTimeUsageUpsert":
+        if self.dumb_minutes > self.total_minutes:
+            raise ValueError("dumb_minutes must not exceed total_minutes")
+        return self
+
+
+class ScreenTimeUsageOut(BaseModel):
+    date: str
+    total_minutes: int
+    dumb_minutes: int
     updated_at: str

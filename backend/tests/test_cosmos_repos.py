@@ -8,6 +8,7 @@ from app.db.cosmos import (
     CosmosMealEntryRepository,
     CosmosMoodEntryRepository,
     CosmosScreenTimeRuleRepository,
+    CosmosScreenTimeUsageRepository,
     CosmosUserRepository,
     CosmosWorkoutRepository,
 )
@@ -193,3 +194,41 @@ async def test_screentime_rule_repository_create_assigns_id():
 
     assert record["id"]
     container.create_item.assert_awaited_once_with(record)
+
+
+async def test_screentime_usage_repository_upsert_matches_memory_shape():
+    from app.db.memory import InMemoryScreenTimeUsageRepository
+
+    container = MagicMock()
+    container.upsert_item = AsyncMock()
+    repo = CosmosScreenTimeUsageRepository(_client_with_container(container), "health_app")
+
+    record = await repo.upsert("user-1", date(2026, 10, 1), 100, 40)
+    memory_record = await InMemoryScreenTimeUsageRepository().upsert("user-1", date(2026, 10, 1), 100, 40)
+
+    assert record["id"] == "usage-2026-10-01"
+    assert record["user_id"] == "user-1"
+    assert {k: v for k, v in record.items() if k != "updated_at"} == {
+        k: v for k, v in memory_record.items() if k != "updated_at"
+    }
+    container.upsert_item.assert_awaited_once_with(record)
+
+
+async def test_screentime_usage_repository_list_range_queries_by_partition_key_and_sorts():
+    container = MagicMock()
+    captured = {}
+
+    async def fake_query_items(query, parameters, partition_key):
+        captured.update(query=query, parameters=parameters, partition_key=partition_key)
+        for item in [{"id": "usage-2026-10-02", "date": "2026-10-02"}, {"id": "usage-2026-10-01", "date": "2026-10-01"}]:
+            yield item
+
+    container.query_items = fake_query_items
+    repo = CosmosScreenTimeUsageRepository(_client_with_container(container), "health_app")
+
+    rows = await repo.list_range("user-1", date(2026, 10, 1), date(2026, 10, 2))
+
+    assert [r["date"] for r in rows] == ["2026-10-01", "2026-10-02"]
+    assert captured["partition_key"] == "user-1"
+    assert {"name": "@start", "value": "2026-10-01"} in captured["parameters"]
+    assert {"name": "@end", "value": "2026-10-02"} in captured["parameters"]

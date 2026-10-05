@@ -16,6 +16,7 @@ from app.db.memory import (
     InMemoryMealEntryRepository,
     InMemoryMoodEntryRepository,
     InMemoryScreenTimeRuleRepository,
+    InMemoryScreenTimeUsageRepository,
     InMemoryUserRepository,
     InMemoryWorkoutRepository,
 )
@@ -32,6 +33,7 @@ def client():
     mood_entry_repo = InMemoryMoodEntryRepository()
     journal_entry_repo = InMemoryJournalEntryRepository()
     screentime_rule_repo = InMemoryScreenTimeRuleRepository()
+    screentime_usage_repo = InMemoryScreenTimeUsageRepository()
 
     app.dependency_overrides[deps.get_user_repo] = lambda: user_repo
     app.dependency_overrides[deps.get_meal_entry_repo] = lambda: meal_entry_repo
@@ -41,6 +43,7 @@ def client():
     app.dependency_overrides[deps.get_mood_entry_repo] = lambda: mood_entry_repo
     app.dependency_overrides[deps.get_journal_entry_repo] = lambda: journal_entry_repo
     app.dependency_overrides[deps.get_screentime_rule_repo] = lambda: screentime_rule_repo
+    app.dependency_overrides[deps.get_screentime_usage_repo] = lambda: screentime_usage_repo
 
     with TestClient(app) as test_client:
         yield test_client
@@ -62,7 +65,10 @@ def auth_headers(client):
 @pytest.fixture(autouse=True)
 def _reset_rate_limiters():
     from app.ratelimit import estimate_limiter
+    from app.screentime.router import usage_limiter
 
     estimate_limiter.reset()
+    usage_limiter.reset()
     yield
     estimate_limiter.reset()
+    usage_limiter.reset()
