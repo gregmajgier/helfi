@@ -23,6 +23,55 @@ def test_mood_entry_score_out_of_range_is_rejected(client, auth_headers):
     assert too_high.status_code == 422
 
 
+FULL_CHECK_IN = {
+    **MOOD_PAYLOAD,
+    "energy": 3,
+    "stress": 2,
+    "sleep_quality": 5,
+    "emotions": ["calm", "grateful"],
+    "tags": ["exercise", "work"],
+}
+
+
+def test_full_check_in_round_trips(client, auth_headers):
+    headers = auth_headers()
+
+    created = client.post("/mood/entries", json=FULL_CHECK_IN, headers=headers)
+
+    assert created.status_code == 201
+    body = created.json()
+    assert (body["energy"], body["stress"], body["sleep_quality"]) == (3, 2, 5)
+    assert body["emotions"] == ["calm", "grateful"]
+    assert client.get("/mood/entries", headers=headers).json()[0]["emotions"] == ["calm", "grateful"]
+
+
+def test_quick_check_in_leaves_extra_fields_empty(client, auth_headers):
+    body = client.post("/mood/entries", json=MOOD_PAYLOAD, headers=auth_headers()).json()
+
+    assert body["energy"] is None and body["stress"] is None and body["sleep_quality"] is None
+    assert body["emotions"] == []
+
+
+def test_check_in_scales_are_bounded(client, auth_headers):
+    headers = auth_headers()
+
+    for field in ("energy", "stress", "sleep_quality"):
+        for bad in (0, 6):
+            response = client.post("/mood/entries", json={**FULL_CHECK_IN, field: bad}, headers=headers)
+            assert response.status_code == 422, (field, bad)
+
+
+def test_check_in_labels_and_note_are_bounded(client, auth_headers):
+    headers = auth_headers()
+
+    too_many = client.post("/mood/entries", json={**FULL_CHECK_IN, "emotions": ["x"] * 21}, headers=headers)
+    too_long = client.post("/mood/entries", json={**FULL_CHECK_IN, "tags": ["y" * 41]}, headers=headers)
+    blank = client.post("/mood/entries", json={**FULL_CHECK_IN, "tags": ["  "]}, headers=headers)
+    long_note = client.post("/mood/entries", json={**FULL_CHECK_IN, "note": "n" * 2001}, headers=headers)
+
+    assert [r.status_code for r in (too_many, too_long, blank, long_note)] == [422, 422, 422, 422]
+
+
 def test_update_and_delete_own_mood_entry(client, auth_headers):
     headers = auth_headers()
     entry_id = client.post("/mood/entries", json=MOOD_PAYLOAD, headers=headers).json()["id"]

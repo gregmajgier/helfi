@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Pressable, type StyleProp, type ViewStyle } from "react-native";
+import { Pressable, type AccessibilityRole, type AccessibilityState, type StyleProp, type ViewStyle } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 
 import { useReducedMotion } from "@/lib/motion";
@@ -10,13 +10,23 @@ const APressable = Animated.createAnimatedComponent(Pressable);
 export function AnimatedPressable({
   children,
   onPress,
+  onLongPress,
   disabled,
   style,
+  accessibilityRole,
+  accessibilityLabel,
+  accessibilityHint,
+  accessibilityState,
 }: {
   children: ReactNode;
-  onPress: () => void;
+  onPress?: () => void;
+  onLongPress?: () => void;
   disabled?: boolean;
   style?: StyleProp<ViewStyle>;
+  accessibilityRole?: AccessibilityRole;
+  accessibilityLabel?: string;
+  accessibilityHint?: string;
+  accessibilityState?: AccessibilityState;
 }) {
   const reduced = useReducedMotion();
   const scale = useSharedValue(1);
@@ -29,6 +39,11 @@ export function AnimatedPressable({
   return (
     <APressable
       onPress={onPress}
+      onLongPress={onLongPress}
+      accessibilityRole={accessibilityRole}
+      accessibilityLabel={accessibilityLabel}
+      accessibilityHint={accessibilityHint}
+      accessibilityState={accessibilityState}
       disabled={disabled}
       onPressIn={() => {
         if (reduced) opacity.set(0.7);

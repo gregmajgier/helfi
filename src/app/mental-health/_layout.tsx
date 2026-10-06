@@ -4,6 +4,7 @@ export default function MentalHealthLayout() {
   return (
     <Stack>
       <Stack.Screen name="index" options={{ title: "Mind" }} />
+      <Stack.Screen name="check-in" options={{ title: "Check-in" }} />
       <Stack.Screen name="journal" options={{ title: "Journal" }} />
       <Stack.Screen name="history" options={{ title: "History" }} />
     </Stack>
