@@ -1,4 +1,6 @@
+import math
 from datetime import date, datetime, timedelta, timezone
+from typing import Optional
 
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, Path, Query, UploadFile, status
@@ -111,6 +113,73 @@ async def remove_favorite(
 OPEN_FOOD_FACTS_URL = "https://world.openfoodfacts.org/api/v2/product/{barcode}.json"
 
 
+# Open Food Facts is crowd-edited. Anything we cache from it becomes a shared food served to every
+# user, so values are range-checked per 100 g before being stored. Bad products are treated as not found.
+_OFF_MAX_NAME_LENGTH = 120
+_OFF_MAX_KCAL_PER_100G = 900  # pure fat is about 900
+_OFF_MAX_GRAMS_PER_100G = 100
+_OFF_MAX_SODIUM_G_PER_100G = 40  # pure salt is about 39 g sodium per 100 g
+
+
+def _off_number(nutriments: dict, key: str, maximum: float, required: bool = False) -> Optional[float]:
+    """A finite, non-negative number within `maximum`, 0 when absent, None when present but invalid."""
+    value = nutriments.get(key)
+    if value is None:
+        return None if required else 0.0
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return None
+    number = float(value)
+    if not math.isfinite(number) or number < 0 or number > maximum:
+        return None
+    return number
+
+
+def _food_from_open_food_facts(product, barcode: str) -> Optional[dict]:
+    if not isinstance(product, dict):
+        return None
+    nutriments = product.get("nutriments")
+    if not isinstance(nutriments, dict):
+        return None
+    raw_name = product.get("product_name") or product.get("generic_name")
+    if not isinstance(raw_name, str):
+        return None
+    name = " ".join(raw_name.split())
+    if not name or len(name) > _OFF_MAX_NAME_LENGTH or not name.isprintable():
+        return None
+
+    calories = _off_number(nutriments, "energy-kcal_100g", _OFF_MAX_KCAL_PER_100G, required=True)
+    protein = _off_number(nutriments, "proteins_100g", _OFF_MAX_GRAMS_PER_100G)
+    carbs = _off_number(nutriments, "carbohydrates_100g", _OFF_MAX_GRAMS_PER_100G)
+    fat = _off_number(nutriments, "fat_100g", _OFF_MAX_GRAMS_PER_100G)
+    fiber = _off_number(nutriments, "fiber_100g", _OFF_MAX_GRAMS_PER_100G)
+    sugar = _off_number(nutriments, "sugars_100g", _OFF_MAX_GRAMS_PER_100G)
+    saturated = _off_number(nutriments, "saturated-fat_100g", _OFF_MAX_GRAMS_PER_100G)
+    # Open Food Facts reports sodium in grams per 100 g.
+    sodium_g = _off_number(nutriments, "sodium_100g", _OFF_MAX_SODIUM_G_PER_100G)
+    values = [calories, protein, carbs, fat, fiber, sugar, saturated, sodium_g]
+    if any(v is None for v in values):
+        return None
+    # 100 g cannot hold more than ~100 g of macros (small slack for rounding in the source data).
+    if protein + carbs + fat > _OFF_MAX_GRAMS_PER_100G * 1.05:
+        return None
+
+    return {
+        "name": name,
+        "serving_size": 100,
+        "serving_unit": "g",
+        "calories_per_serving": calories,
+        "protein_g": protein,
+        "carbs_g": carbs,
+        "fat_g": fat,
+        "fiber_g": fiber,
+        "sugar_g": sugar,
+        "saturated_fat_g": saturated,
+        "sodium_mg": round(sodium_g * 1000, 1),
+        "barcode": barcode,
+        "created_by_user_id": None,
+    }
+
+
 @router.get("/foods/barcode/{barcode}", response_model=FoodOut)
 async def lookup_barcode(
     barcode: str = Path(pattern=r"^\d{8,14}$"),
@@ -127,33 +196,16 @@ async def lookup_barcode(
     except httpx.HTTPError:
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="barcode lookup unavailable")
 
-    payload = response.json()
-    if response.status_code != 200 or payload.get("status") != 1:
+    try:
+        payload = response.json()
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="barcode lookup unavailable")
+    if response.status_code != 200 or not isinstance(payload, dict) or payload.get("status") != 1:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="product not found")
 
-    product = payload["product"]
-    nutriments = product.get("nutriments", {})
-    name = product.get("product_name") or product.get("generic_name")
-    calories = nutriments.get("energy-kcal_100g")
-    if not name or calories is None:
+    food = _food_from_open_food_facts(payload.get("product"), barcode)
+    if food is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="product missing nutrition data")
-
-    food = {
-        "name": name,
-        "serving_size": 100,
-        "serving_unit": "g",
-        "calories_per_serving": calories,
-        "protein_g": nutriments.get("proteins_100g", 0) or 0,
-        "carbs_g": nutriments.get("carbohydrates_100g", 0) or 0,
-        "fat_g": nutriments.get("fat_100g", 0) or 0,
-        "fiber_g": nutriments.get("fiber_100g", 0) or 0,
-        "sugar_g": nutriments.get("sugars_100g", 0) or 0,
-        "saturated_fat_g": nutriments.get("saturated-fat_100g", 0) or 0,
-        # Open Food Facts reports sodium in grams per 100 g.
-        "sodium_mg": round((nutriments.get("sodium_100g", 0) or 0) * 1000, 1),
-        "barcode": barcode,
-        "created_by_user_id": None,
-    }
     return await food_repo.create(food)
 
 

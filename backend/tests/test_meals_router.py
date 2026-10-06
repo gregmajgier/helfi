@@ -136,6 +136,99 @@ def test_barcode_lookup_rejects_non_numeric_barcode(client, auth_headers):
     assert client.get("/meals/foods/barcode/abc123", headers=headers).status_code == 422
 
 
+class _FakeOffResponse:
+    def __init__(self, payload, status_code=200):
+        self._payload = payload
+        self.status_code = status_code
+
+    def json(self):
+        if isinstance(self._payload, Exception):
+            raise self._payload
+        return self._payload
+
+
+def _stub_open_food_facts(monkeypatch, payload, status_code=200):
+    class FakeClient:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *exc):
+            return False
+
+        async def get(self, url):
+            return _FakeOffResponse(payload, status_code)
+
+    monkeypatch.setattr("app.meals.router.httpx.AsyncClient", FakeClient)
+
+
+def _off_product(**overrides):
+    nutriments = {
+        "energy-kcal_100g": 250,
+        "proteins_100g": 8,
+        "carbohydrates_100g": 40,
+        "fat_100g": 6,
+        "sodium_100g": 0.4,
+    }
+    nutriments.update(overrides.pop("nutriments", {}))
+    return {"status": 1, "product": {"product_name": "Oat bar", "nutriments": nutriments, **overrides}}
+
+
+def test_barcode_lookup_caches_a_valid_open_food_facts_product(client, auth_headers, monkeypatch):
+    _stub_open_food_facts(monkeypatch, _off_product())
+
+    response = client.get("/meals/foods/barcode/5000112637922", headers=auth_headers())
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["name"] == "Oat bar"
+    assert body["calories_per_serving"] == 250
+    assert body["sodium_mg"] == 400
+
+
+def test_barcode_lookup_rejects_implausible_open_food_facts_values(client, auth_headers, monkeypatch):
+    headers = auth_headers()
+    bad_nutriments = [
+        {"energy-kcal_100g": -5},
+        {"energy-kcal_100g": 1_000_000},
+        {"energy-kcal_100g": "lots"},
+        {"energy-kcal_100g": float("nan")},
+        {"proteins_100g": 400},
+        {"sodium_100g": 5000},
+        {"proteins_100g": 60, "carbohydrates_100g": 60, "fat_100g": 60},
+    ]
+    for index, nutriments in enumerate(bad_nutriments):
+        _stub_open_food_facts(monkeypatch, _off_product(nutriments=nutriments))
+        barcode = f"500011263{index:04d}"
+        assert client.get(f"/meals/foods/barcode/{barcode}", headers=headers).status_code == 404, nutriments
+
+
+def test_barcode_lookup_rejects_bad_names_and_shapes(client, auth_headers, monkeypatch):
+    headers = auth_headers()
+    payloads = [
+        _off_product(product_name="x" * 121),
+        _off_product(product_name="bad\x00name"),
+        _off_product(product_name=["not", "a", "string"]),
+        {"status": 1, "product": "oops"},
+        {"status": 1, "product": {"product_name": "No nutriments"}},
+        ["not", "a", "dict"],
+    ]
+    for index, payload in enumerate(payloads):
+        _stub_open_food_facts(monkeypatch, payload)
+        barcode = f"600011263{index:04d}"
+        assert client.get(f"/meals/foods/barcode/{barcode}", headers=headers).status_code == 404, payload
+
+
+def test_barcode_lookup_treats_non_json_as_unavailable(client, auth_headers, monkeypatch):
+    _stub_open_food_facts(monkeypatch, ValueError("not json"))
+
+    response = client.get("/meals/foods/barcode/70001126370001", headers=auth_headers())
+
+    assert response.status_code == 502
+
+
 def test_estimate_from_description_is_rate_limited(client, auth_headers):
     headers = auth_headers()
 
