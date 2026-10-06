@@ -45,9 +45,13 @@ async def create_recipe(
     user_id: str = Depends(get_current_user_id),
     recipe_repo=Depends(get_recipe_repo),
 ):
+    await _enforce_recipe_cap(recipe_repo, user_id)
+    return present(await recipe_repo.create(_body(body, user_id)))
+
+
+async def _enforce_recipe_cap(recipe_repo, user_id: str) -> None:
     if len(await recipe_repo.list_for_user(user_id)) >= MAX_USER_RECIPES:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="recipe limit reached")
-    return present(await recipe_repo.create(_body(body, user_id)))
 
 
 @router.get("/{recipe_id}", response_model=RecipeOut)
@@ -98,6 +102,7 @@ async def copy_recipe(
     source = await load_recipe(recipe_repo, user_id, recipe_id)
     if not source:
         raise _not_found()
+    await _enforce_recipe_cap(recipe_repo, user_id)
     data = RecipeIn(**{k: source[k] for k in RecipeIn.model_fields})
     return present(await recipe_repo.create(_body(data, user_id)))
 

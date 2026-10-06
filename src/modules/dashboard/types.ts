@@ -4,6 +4,13 @@ export type ViewMode = "day" | "week";
 
 export type PillarProgress = { pillar: PillarKey; percent: number; tracked: boolean };
 
+export type PillarCardData = {
+  headline: string;
+  caption: string;
+  progress: number | null;
+  details: { label: string; value: string }[];
+};
+
 export type DashboardSummary = {
   rings: PillarProgress[];
   stats: {
@@ -11,5 +18,5 @@ export type DashboardSummary = {
     trainingHours: number;
     rating: number | null;
   };
-  cards: Record<PillarKey, string>;
+  cards: Record<PillarKey, PillarCardData>;
 };

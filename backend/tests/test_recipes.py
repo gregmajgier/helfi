@@ -115,3 +115,13 @@ def test_cannot_log_someone_elses_recipe(client, auth_headers):
         headers=other,
     )
     assert response.status_code == 404
+
+
+def test_copy_respects_the_recipe_cap(client, auth_headers, monkeypatch):
+    from app.recipes import router as recipes_router
+
+    headers = auth_headers()
+    monkeypatch.setattr(recipes_router, "MAX_USER_RECIPES", 1)
+    assert client.post("/recipes/curated-greek-salad/copy", headers=headers).status_code == 201
+    assert client.post("/recipes/curated-greek-salad/copy", headers=headers).status_code == 400
+    assert client.post("/recipes", json=RECIPE, headers=headers).status_code == 400

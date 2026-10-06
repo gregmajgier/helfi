@@ -192,11 +192,18 @@ async def generate_plan(
             else DEFAULT_CALORIES
         )
     recipes = list(CURATED.values()) + [present(r) for r in await recipe_repo.list_for_user(user_id)]
-    if body.replace:
-        for item in await _range(plan_repo, user_id, body.start, end):
-            await plan_repo.delete(user_id, item["id"])
+    slots = generator.generate(recipes, body.start, body.days, calories)
+    existing = await plan_repo.list_for_user(user_id)
+    replaced = (
+        [i for i in existing if body.start.isoformat() <= i["day"] <= end.isoformat()] if body.replace else []
+    )
+    # Check the cap before touching anything so a rejected request changes nothing.
+    if len(existing) - len(replaced) + len(slots) > MAX_PLAN_ITEMS:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="plan is full")
+    for item in replaced:
+        await plan_repo.delete(user_id, item["id"])
     created = []
-    for slot in generator.generate(recipes, body.start, body.days, calories):
+    for slot in slots:
         created.append(
             await plan_repo.create(
                 _recipe_item(user_id, slot["day"], slot["meal_slot"], slot["recipe"], slot["servings"])
@@ -264,6 +271,12 @@ async def generate_shopping_list(
             row["amount"] += ingredient["amount"]
 
     existing = await shopping_repo.list_for_user(user_id)
+    manual_count = sum(1 for i in existing if i["source"] != "plan")
+    if manual_count + len(needed) > MAX_SHOPPING_ITEMS:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="too many ingredients for one shopping list; choose a shorter date range",
+        )
     ticked = {i["key"] for i in existing if i["source"] == "plan" and i["checked"]}
     for item in existing:
         if item["source"] == "plan":

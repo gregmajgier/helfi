@@ -138,3 +138,39 @@ def test_shopping_is_private(client, auth_headers):
     assert client.patch(f"/shopping/{item_id}", json={"checked": True}, headers=other).status_code == 404
     assert client.delete(f"/shopping/{item_id}", headers=other).status_code == 404
     assert client.delete(f"/shopping/{item_id}", headers=owner).status_code == 204
+
+
+def test_generate_plan_cannot_exceed_the_plan_cap(client, auth_headers, monkeypatch):
+    from app.planning import router as planning_router
+
+    headers = auth_headers()
+    monkeypatch.setattr(planning_router, "MAX_PLAN_ITEMS", 10)
+    ok = client.post("/plan/generate", json={"start": START, "days": 2}, headers=headers)
+    assert ok.status_code == 201  # 2 days x 4 slots = 8
+
+    # replace=false would stack another 8 on top of the existing 8.
+    over = client.post("/plan/generate", json={"start": "2026-11-01", "days": 2, "replace": False}, headers=headers)
+    assert over.status_code == 400
+    # A rejected request must not have changed anything.
+    assert len(client.get("/plan", params={"start": START, "end": "2026-11-02"}, headers=headers).json()) == 8
+
+
+def test_generate_plan_replace_counts_only_net_growth(client, auth_headers, monkeypatch):
+    from app.planning import router as planning_router
+
+    headers = auth_headers()
+    monkeypatch.setattr(planning_router, "MAX_PLAN_ITEMS", 10)
+    client.post("/plan/generate", json={"start": START, "days": 2}, headers=headers)
+    # Same range with replace swaps 8 for 8, so it stays within the cap.
+    again = client.post("/plan/generate", json={"start": START, "days": 2}, headers=headers)
+    assert again.status_code == 201
+
+
+def test_shopping_generation_is_capped(client, auth_headers, monkeypatch):
+    from app.planning import router as planning_router
+
+    headers = auth_headers()
+    _add_recipe(client, headers, recipe_id="curated-chicken-rice-bowl")
+    monkeypatch.setattr(planning_router, "MAX_SHOPPING_ITEMS", 2)
+    response = client.post("/shopping/generate", json={"start": START, "end": START}, headers=headers)
+    assert response.status_code == 400

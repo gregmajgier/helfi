@@ -28,12 +28,15 @@ export function useDashboardSummary(anchor: Date, mode: ViewMode, enabled: boole
       const t = new Date(iso).getTime();
       return t >= start.getTime() && t < end.getTime();
     };
+    const meals = dayEntries.flat();
+    const sumOf = (pick: (e: (typeof meals)[number]) => number) => meals.reduce((sum, e) => sum + pick(e), 0);
     setSummary(
       computeSummary({
         mode,
         workouts: allWorkouts.filter((w) => inRange(w.started_at)),
         moveGoalPerWeek: moveGoal,
-        calories: dayEntries.flat().reduce((sum, e) => sum + e.calories, 0),
+        calories: sumOf((e) => e.calories),
+        macros: { protein_g: sumOf((e) => e.protein_g), carbs_g: sumOf((e) => e.carbs_g), fat_g: sumOf((e) => e.fat_g) },
         calorieGoal,
         moods: moods.filter((m) => inRange(m.logged_at)),
       })
