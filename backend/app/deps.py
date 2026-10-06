@@ -3,6 +3,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from .config import settings
 from .db.cosmos import (
+    CosmosDocRepository,
     CosmosExerciseRepository,
     CosmosFoodRepository,
     CosmosJournalEntryRepository,
@@ -17,6 +18,7 @@ from .db.cosmos import (
 from .db.memory import (
     SEED_EXERCISES,
     SEED_FOODS,
+    InMemoryDocRepository,
     InMemoryExerciseRepository,
     InMemoryFoodRepository,
     InMemoryJournalEntryRepository,
@@ -40,6 +42,46 @@ _memory_mood_entry_repo = InMemoryMoodEntryRepository()
 _memory_journal_entry_repo = InMemoryJournalEntryRepository()
 _memory_screentime_rule_repo = InMemoryScreenTimeRuleRepository()
 _memory_screentime_usage_repo = InMemoryScreenTimeUsageRepository()
+
+_memory_doc_repos: dict[str, InMemoryDocRepository] = {}
+
+
+def _doc_repo(container_name: str):
+    if settings.db_backend == "cosmos":
+        return CosmosDocRepository(get_cosmos_client(), settings.cosmos_database_name, container_name)
+    return _memory_doc_repos.setdefault(container_name, InMemoryDocRepository())
+
+
+def get_profile_repo():
+    return _doc_repo("profiles")
+
+
+def get_weight_repo():
+    return _doc_repo("weight_entries")
+
+
+def get_favorite_repo():
+    return _doc_repo("favorites")
+
+
+def get_recipe_repo():
+    return _doc_repo("recipes")
+
+
+def get_plan_repo():
+    return _doc_repo("meal_plan")
+
+
+def get_shopping_repo():
+    return _doc_repo("shopping_items")
+
+
+def get_water_repo():
+    return _doc_repo("water_entries")
+
+
+def get_fasting_repo():
+    return _doc_repo("fasting_sessions")
 
 
 def get_user_repo():

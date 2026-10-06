@@ -2,7 +2,7 @@ import { Redirect, useFocusEffect, useRouter, type Href } from "expo-router";
 import { useCallback, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 
-import { Chip, PillarTile, RingCluster, ScreenContainer, StatTile } from "@/components";
+import { Chip, PillarCard, RingCluster, ScreenContainer, StatTile } from "@/components";
 import { useAuth } from "@/lib/auth-context";
 import { isOnboardingComplete } from "@/lib/onboarding-store";
 import { useTheme } from "@/lib/theme";
@@ -117,11 +117,11 @@ export default function Home() {
           <StatTile index={3} value={stats?.rating == null ? "-" : `${stats.rating}/5`} label={timeUnit} />
         </View>
 
-        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.md }}>
-          <PillarTile index={0} pillar="move" status={summary?.cards.move ?? "Loading..."} onPress={() => router.push("/training-tracker" as Href)} />
-          <PillarTile index={1} pillar="fuel" status={summary?.cards.fuel ?? "Loading..."} onPress={() => router.push("/meal-tracker" as Href)} />
-          <PillarTile index={2} pillar="mind" status={summary?.cards.mind ?? "Loading..."} onPress={() => router.push("/mental-health" as Href)} />
-          <PillarTile index={3} pillar="focus" status={summary?.cards.focus ?? "Loading..."} onPress={() => router.push("/digital-health" as Href)} />
+        <View style={{ gap: spacing.md }}>
+          <PillarCard index={0} pillar="move" data={summary?.cards.move} onPress={() => router.push("/training-tracker" as Href)} />
+          <PillarCard index={1} pillar="fuel" data={summary?.cards.fuel} onPress={() => router.push("/meal-tracker" as Href)} />
+          <PillarCard index={2} pillar="mind" data={summary?.cards.mind} onPress={() => router.push("/mental-health" as Href)} />
+          <PillarCard index={3} pillar="focus" data={summary?.cards.focus} onPress={() => router.push("/digital-health" as Href)} />
         </View>
       </ScrollView>
     </ScreenContainer>

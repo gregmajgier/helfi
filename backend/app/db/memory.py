@@ -62,11 +62,17 @@ class InMemoryMealEntryRepository:
         return record
 
     async def list_for_day(self, user_id: str, day: date) -> list[dict]:
-        return [
+        return await self.list_range(user_id, day, day)
+
+    async def list_range(self, user_id: str, start: date, end: date) -> list[dict]:
+        # Older entries have no explicit "day"; fall back to the logged_at date.
+        results = [
             e
             for e in self._entries.values()
-            if e["user_id"] == user_id and e["logged_at"].startswith(day.isoformat())
+            if e["user_id"] == user_id
+            and start.isoformat() <= (e.get("day") or e["logged_at"][:10]) <= end.isoformat()
         ]
+        return sorted(results, key=lambda e: e["logged_at"])
 
     async def get(self, user_id: str, entry_id: str) -> Optional[dict]:
         entry = self._entries.get(entry_id)
@@ -109,6 +115,108 @@ class InMemoryFoodRepository:
         record = {**food, "id": food_id}
         self._foods[food_id] = record
         return record
+
+    async def search(self, query: str, user_id: str, limit: int = 25) -> list[dict]:
+        q = query.strip().lower()
+        matches = [
+            f
+            for f in self._foods.values()
+            if q in f["name"].lower() and f.get("created_by_user_id") in (None, user_id)
+        ]
+        return rank_food_matches(matches, q)[:limit]
+
+    async def list_for_user(self, user_id: str) -> list[dict]:
+        mine = [f for f in self._foods.values() if f.get("created_by_user_id") == user_id]
+        return sorted(mine, key=lambda f: f["name"].lower())
+
+    async def update(self, food_id: str, user_id: str, updates: dict) -> Optional[dict]:
+        food = self._foods.get(food_id)
+        if not food or food.get("created_by_user_id") != user_id:
+            return None
+        food.update(updates)
+        return food
+
+    async def delete(self, food_id: str, user_id: str) -> bool:
+        food = self._foods.get(food_id)
+        if not food or food.get("created_by_user_id") != user_id:
+            return False
+        del self._foods[food_id]
+        return True
+
+
+def rank_food_matches(foods: list[dict], q: str) -> list[dict]:
+    """Prefix matches first, then word-start matches, then shorter names."""
+
+    def key(food: dict):
+        name = food["name"].lower()
+        if name.startswith(q):
+            tier = 0
+        elif f" {q}" in name:
+            tier = 1
+        else:
+            tier = 2
+        return (tier, len(name), name)
+
+    return sorted(foods, key=key)
+
+
+class InMemoryDocRepository:
+    """Generic per-user document store used by the smaller food-module containers."""
+
+    def __init__(self):
+        self._docs: dict[str, dict] = {}
+
+    async def create(self, doc: dict) -> dict:
+        doc_id = str(uuid.uuid4())
+        now = datetime.now(timezone.utc).isoformat()
+        record = {**doc, "id": doc_id, "created_at": now, "updated_at": now}
+        self._docs[doc_id] = record
+        return record
+
+    async def put(self, doc: dict) -> dict:
+        """Upsert a document with a caller-chosen id (one-per-user docs, favorites)."""
+        now = datetime.now(timezone.utc).isoformat()
+        existing = self._docs.get(doc["id"])
+        if existing and existing["user_id"] != doc["user_id"]:
+            raise PermissionError("document id belongs to another user")
+        created = existing["created_at"] if existing else now
+        record = {**doc, "created_at": created, "updated_at": now}
+        self._docs[doc["id"]] = record
+        return record
+
+    async def list_for_user(
+        self,
+        user_id: str,
+        field: Optional[str] = None,
+        gte: Optional[str] = None,
+        lte: Optional[str] = None,
+    ) -> list[dict]:
+        results = [d for d in self._docs.values() if d["user_id"] == user_id]
+        if field is not None:
+            if gte is not None:
+                results = [d for d in results if d.get(field, "") >= gte]
+            if lte is not None:
+                results = [d for d in results if d.get(field, "") <= lte]
+        return sorted(results, key=lambda d: (d.get(field or "created_at", ""), d["created_at"]))
+
+    async def get(self, user_id: str, doc_id: str) -> Optional[dict]:
+        doc = self._docs.get(doc_id)
+        return doc if doc and doc["user_id"] == user_id else None
+
+    async def update(self, user_id: str, doc_id: str, updates: dict) -> Optional[dict]:
+        doc = await self.get(user_id, doc_id)
+        if not doc:
+            return None
+        doc.update(updates)
+        doc["updated_at"] = datetime.now(timezone.utc).isoformat()
+        return doc
+
+    async def delete(self, user_id: str, doc_id: str) -> bool:
+        doc = await self.get(user_id, doc_id)
+        if not doc:
+            return False
+        del self._docs[doc_id]
+        return True
 
 
 SEED_FOODS: list[dict] = _load_seed_foods()

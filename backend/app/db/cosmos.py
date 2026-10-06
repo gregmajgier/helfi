@@ -12,6 +12,18 @@ _FOODS_SEED_PATH = Path(__file__).parent / "data" / "foods_seed.json"
 
 _client: Optional[CosmosClient] = None
 
+# Per-user containers backed by CosmosDocRepository, all partitioned by /user_id.
+DOC_CONTAINERS = (
+    "profiles",
+    "weight_entries",
+    "favorites",
+    "recipes",
+    "meal_plan",
+    "shopping_items",
+    "water_entries",
+    "fasting_sessions",
+)
+
 
 def get_cosmos_client() -> CosmosClient:
     global _client
@@ -56,6 +68,11 @@ async def init_cosmos(client: CosmosClient, database_name: str) -> None:
     await database.create_container_if_not_exists(
         id="screentime_usage", partition_key=PartitionKey(path="/user_id")
     )
+
+    for container_name in DOC_CONTAINERS:
+        await database.create_container_if_not_exists(
+            id=container_name, partition_key=PartitionKey(path="/user_id")
+        )
     await _seed_exercises(exercises_container)
     await _seed_foods(foods_container)
 
@@ -129,16 +146,27 @@ class CosmosMealEntryRepository:
         return record
 
     async def list_for_day(self, user_id: str, day: date) -> list[dict]:
+        return await self.list_range(user_id, day, day)
+
+    async def list_range(self, user_id: str, start: date, end: date) -> list[dict]:
+        # Older entries have no explicit "day"; fall back to the logged_at date.
         container = self._container()
-        query = "SELECT * FROM c WHERE c.user_id = @user_id AND STARTSWITH(c.logged_at, @day)"
+        query = (
+            "SELECT * FROM c WHERE c.user_id = @user_id AND ("
+            "(IS_DEFINED(c.day) AND c.day >= @start AND c.day <= @end) OR "
+            "(NOT IS_DEFINED(c.day) AND SUBSTRING(c.logged_at, 0, 10) >= @start "
+            "AND SUBSTRING(c.logged_at, 0, 10) <= @end))"
+        )
         params = [
             {"name": "@user_id", "value": user_id},
-            {"name": "@day", "value": day.isoformat()},
+            {"name": "@start", "value": start.isoformat()},
+            {"name": "@end", "value": end.isoformat()},
         ]
-        return [
+        items = [
             item
             async for item in container.query_items(query=query, parameters=params, partition_key=user_id)
         ]
+        return sorted(items, key=lambda e: e["logged_at"])
 
     async def get(self, user_id: str, entry_id: str) -> Optional[dict]:
         container = self._container()
@@ -198,6 +226,42 @@ class CosmosFoodRepository:
         record = {**food, "id": str(uuid.uuid4())}
         await container.create_item(record)
         return record
+
+    async def search(self, query: str, user_id: str, limit: int = 25) -> list[dict]:
+        from .memory import rank_food_matches
+
+        q = query.strip().lower()
+        container = self._container()
+        sql = (
+            "SELECT TOP 200 * FROM c WHERE CONTAINS(LOWER(c.name), @q) AND "
+            "(NOT IS_DEFINED(c.created_by_user_id) OR IS_NULL(c.created_by_user_id) "
+            "OR c.created_by_user_id = @user_id)"
+        )
+        params = [{"name": "@q", "value": q}, {"name": "@user_id", "value": user_id}]
+        items = [item async for item in container.query_items(query=sql, parameters=params)]
+        return rank_food_matches(items, q)[:limit]
+
+    async def list_for_user(self, user_id: str) -> list[dict]:
+        container = self._container()
+        sql = "SELECT * FROM c WHERE c.created_by_user_id = @user_id"
+        params = [{"name": "@user_id", "value": user_id}]
+        items = [item async for item in container.query_items(query=sql, parameters=params)]
+        return sorted(items, key=lambda f: f["name"].lower())
+
+    async def update(self, food_id: str, user_id: str, updates: dict) -> Optional[dict]:
+        food = await self.get(food_id)
+        if not food or food.get("created_by_user_id") != user_id:
+            return None
+        food.update(updates)
+        await self._container().replace_item(item=food_id, body=food)
+        return food
+
+    async def delete(self, food_id: str, user_id: str) -> bool:
+        food = await self.get(food_id)
+        if not food or food.get("created_by_user_id") != user_id:
+            return False
+        await self._container().delete_item(item=food_id, partition_key=food_id)
+        return True
 
 
 class CosmosWorkoutRepository:
@@ -468,3 +532,83 @@ class CosmosScreenTimeUsageRepository:
             async for item in container.query_items(query=query, parameters=params, partition_key=user_id)
         ]
         return sorted(items, key=lambda r: r["date"])
+
+
+class CosmosDocRepository:
+    """Generic per-user document store, one instance per container name."""
+
+    # Only these names are ever interpolated into a query string (never client input).
+    _RANGE_FIELDS = {"day", "started_at", "created_at", "logged_at"}
+
+    def __init__(self, client: CosmosClient, database_name: str, container_name: str):
+        if container_name not in DOC_CONTAINERS:
+            raise ValueError(f"unknown container {container_name}")
+        self._client = client
+        self._database_name = database_name
+        self._container_name = container_name
+
+    def _container(self):
+        return self._client.get_database_client(self._database_name).get_container_client(
+            self._container_name
+        )
+
+    async def create(self, doc: dict) -> dict:
+        now = datetime.now(timezone.utc).isoformat()
+        record = {**doc, "id": str(uuid.uuid4()), "created_at": now, "updated_at": now}
+        await self._container().create_item(record)
+        return record
+
+    async def put(self, doc: dict) -> dict:
+        existing = await self.get(doc["user_id"], doc["id"])
+        now = datetime.now(timezone.utc).isoformat()
+        record = {**doc, "created_at": existing["created_at"] if existing else now, "updated_at": now}
+        await self._container().upsert_item(record)
+        return record
+
+    async def list_for_user(
+        self,
+        user_id: str,
+        field: Optional[str] = None,
+        gte: Optional[str] = None,
+        lte: Optional[str] = None,
+    ) -> list[dict]:
+        query = "SELECT * FROM c WHERE c.user_id = @user_id"
+        params = [{"name": "@user_id", "value": user_id}]
+        if field is not None:
+            if field not in self._RANGE_FIELDS:
+                raise ValueError(f"unsupported range field {field}")
+            if gte is not None:
+                query += f" AND c.{field} >= @gte"
+                params.append({"name": "@gte", "value": gte})
+            if lte is not None:
+                query += f" AND c.{field} <= @lte"
+                params.append({"name": "@lte", "value": lte})
+        items = [
+            item
+            async for item in self._container().query_items(
+                query=query, parameters=params, partition_key=user_id
+            )
+        ]
+        return sorted(items, key=lambda d: (d.get(field or "created_at", ""), d["created_at"]))
+
+    async def get(self, user_id: str, doc_id: str) -> Optional[dict]:
+        try:
+            return await self._container().read_item(item=doc_id, partition_key=user_id)
+        except Exception:
+            return None
+
+    async def update(self, user_id: str, doc_id: str, updates: dict) -> Optional[dict]:
+        doc = await self.get(user_id, doc_id)
+        if not doc:
+            return None
+        doc.update(updates)
+        doc["updated_at"] = datetime.now(timezone.utc).isoformat()
+        await self._container().replace_item(item=doc_id, body=doc)
+        return doc
+
+    async def delete(self, user_id: str, doc_id: str) -> bool:
+        doc = await self.get(user_id, doc_id)
+        if not doc:
+            return False
+        await self._container().delete_item(item=doc_id, partition_key=user_id)
+        return True

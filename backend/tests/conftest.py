@@ -10,6 +10,7 @@ from app import deps
 from app.db.memory import (
     SEED_EXERCISES,
     SEED_FOODS,
+    InMemoryDocRepository,
     InMemoryExerciseRepository,
     InMemoryFoodRepository,
     InMemoryJournalEntryRepository,
@@ -23,6 +24,12 @@ from app.db.memory import (
 from app.main import app
 
 
+def _provide(repo):
+    # A real closure: a lambda default would be read by FastAPI as a query
+    # parameter and deep-copied per request.
+    return lambda: repo
+
+
 @pytest.fixture()
 def client():
     user_repo = InMemoryUserRepository()
@@ -34,6 +41,18 @@ def client():
     journal_entry_repo = InMemoryJournalEntryRepository()
     screentime_rule_repo = InMemoryScreenTimeRuleRepository()
     screentime_usage_repo = InMemoryScreenTimeUsageRepository()
+
+    for getter in (
+        deps.get_profile_repo,
+        deps.get_weight_repo,
+        deps.get_favorite_repo,
+        deps.get_recipe_repo,
+        deps.get_plan_repo,
+        deps.get_shopping_repo,
+        deps.get_water_repo,
+        deps.get_fasting_repo,
+    ):
+        app.dependency_overrides[getter] = _provide(InMemoryDocRepository())
 
     app.dependency_overrides[deps.get_user_repo] = lambda: user_repo
     app.dependency_overrides[deps.get_meal_entry_repo] = lambda: meal_entry_repo

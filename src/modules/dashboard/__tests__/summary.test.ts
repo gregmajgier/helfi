@@ -55,13 +55,13 @@ describe("computeSummary", () => {
   it("scales calorie goal by 7 in week mode", () => {
     const s = computeSummary({ ...base, mode: "week", calories: 7000, calorieGoal: 2000 });
     expect(ring(s, "fuel").percent).toBeCloseTo(0.5);
-    expect(s.cards.fuel).toContain("14,000");
+    expect(s.cards.fuel.caption).toContain("14,000");
   });
 
   it("week move percent is workouts over weekly goal", () => {
     const s = computeSummary({ ...base, mode: "week", workouts: [workout(30), workout(30)], moveGoalPerWeek: 4 });
     expect(ring(s, "move")).toMatchObject({ percent: 0.5, tracked: true });
-    expect(s.cards.move).toBe("2/4 workouts");
+    expect(s.cards.move).toMatchObject({ headline: "2/4", caption: "workouts", progress: 0.5 });
   });
 
   it("averages mood and reports hours", () => {
@@ -69,5 +69,7 @@ describe("computeSummary", () => {
     expect(s.stats.rating).toBe(4.5);
     expect(ring(s, "mind")).toMatchObject({ percent: 0.9, tracked: true });
     expect(s.stats.trainingHours).toBe(1.5);
+    expect(s.cards.move.details[0]).toEqual({ label: "Time", value: "1h 30m" });
+    expect(s.cards.mind.headline).toBe("4.5/5");
   });
 });

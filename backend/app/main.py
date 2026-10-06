@@ -9,8 +9,13 @@ from .auth.router import router as auth_router
 from .config import settings, validate_production_settings
 from .db.cosmos import close_cosmos_client, get_cosmos_client, init_cosmos
 from .meals.router import router as meals_router
+from .fasting.router import router as fasting_router
 from .mood.router import router as mood_router
+from .planning.router import plan_router, shopping_router
+from .profile.router import router as profile_router
+from .recipes.router import router as recipes_router
 from .screentime.router import router as screentime_router
+from .water.router import router as water_router
 from .workouts.router import router as workouts_router
 
 
@@ -54,6 +59,12 @@ app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(meals_router, prefix="/meals", tags=["meals"])
 app.include_router(workouts_router, prefix="/workouts", tags=["workouts"])
 app.include_router(mood_router, prefix="/mood", tags=["mood"])
+app.include_router(profile_router, prefix="/profile", tags=["profile"])
+app.include_router(recipes_router, prefix="/recipes", tags=["recipes"])
+app.include_router(water_router, prefix="/water", tags=["water"])
+app.include_router(plan_router, prefix="/plan", tags=["plan"])
+app.include_router(shopping_router, prefix="/shopping", tags=["shopping"])
+app.include_router(fasting_router, prefix="/fasting", tags=["fasting"])
 app.include_router(screentime_router, prefix="/screentime", tags=["screentime"])
 
 

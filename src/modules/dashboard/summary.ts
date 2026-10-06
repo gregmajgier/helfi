@@ -21,6 +21,13 @@ export function rangeFor(anchor: Date, mode: ViewMode): { start: Date; end: Date
   return { start, end, days };
 }
 
+function formatDuration(minutes: number): string {
+  const total = Math.round(minutes);
+  const h = Math.floor(total / 60);
+  const m = total % 60;
+  return h ? `${h}h ${m}m` : `${m}m`;
+}
+
 const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
 
 export function formatMinutes(total: number): string {
@@ -42,10 +49,10 @@ export function computeFocus(focus: FocusInput | undefined, mode: ViewMode) {
   const values = focus ? Object.values(focus.dumbMinutesByDay) : [];
   const granted = focus?.permission === "granted" && focus.budget > 0;
   if (!focus || !granted) {
-    return { percent: 0, tracked: false, hours: null, card: "Set up screen-time tracking" };
+    return { percent: 0, tracked: false, hours: null, headline: "-", caption: "Set up screen-time tracking" };
   }
   if (values.length === 0) {
-    return { percent: 0, tracked: false, hours: null, card: "No screen-time data yet" };
+    return { percent: 0, tracked: false, hours: null, headline: "-", caption: "No screen-time data yet" };
   }
   const total = values.reduce((a, b) => a + b, 0);
   const percent = values.reduce((sum, v) => sum + clamp01(1 - v / focus.budget), 0) / values.length;
@@ -54,7 +61,8 @@ export function computeFocus(focus: FocusInput | undefined, mode: ViewMode) {
     percent,
     tracked: true,
     hours: Math.round((total / 60) * 10) / 10,
-    card: `${formatMinutes(shown)}${mode === "week" ? " avg" : ""} of ${formatMinutes(focus.budget)} budget`,
+    headline: formatMinutes(shown),
+    caption: `${mode === "week" ? "avg " : ""}of ${formatMinutes(focus.budget)} budget`,
   };
 }
 
@@ -64,14 +72,16 @@ export type SummaryInput = {
   moveGoalPerWeek: number | null;
   calories: number;
   calorieGoal: number | null;
+  macros?: { protein_g: number; carbs_g: number; fat_g: number };
   moods: MoodEntry[];
   focus?: FocusInput;
 };
 
 export function computeSummary(input: SummaryInput): DashboardSummary {
-  const { mode, workouts, moveGoalPerWeek, calories, calorieGoal, moods, focus } = input;
+  const { mode, workouts, moveGoalPerWeek, calories, calorieGoal, moods, focus, macros = { protein_g: 0, carbs_g: 0, fat_g: 0 } } = input;
   const focusResult = computeFocus(focus, mode);
   const minutes = workouts.reduce((sum, w) => sum + w.duration_s / 60, 0);
+  const distanceM = workouts.reduce((sum, w) => sum + (w.distance_m ?? 0), 0);
   const days = mode === "week" ? 7 : 1;
 
   let movePercent = 0;
@@ -100,15 +110,37 @@ export function computeSummary(input: SummaryInput): DashboardSummary {
       screenTimeHours: focusResult.hours,
     },
     cards: {
-      move:
-        mode === "week" && moveGoalPerWeek
-          ? `${workouts.length}/${moveGoalPerWeek} workouts`
-          : `${workouts.length} workout${workouts.length === 1 ? "" : "s"} ${period}`,
-      fuel: calorieGoal
-        ? `${Math.round(calories).toLocaleString()} / ${(calorieGoal * days).toLocaleString()} kcal`
-        : `${Math.round(calories).toLocaleString()} kcal ${period}`,
-      mind: moods.length ? `${moods.length} check-in${moods.length === 1 ? "" : "s"} ${period}` : "No check-ins yet",
-      focus: focusResult.card,
+      move: {
+        headline: mode === "week" && moveGoalPerWeek ? `${workouts.length}/${moveGoalPerWeek}` : String(workouts.length),
+        caption: workouts.length === 1 && !(mode === "week" && moveGoalPerWeek) ? "workout" : "workouts",
+        progress: moveGoalPerWeek ? clamp01(movePercent) : null,
+        details: [
+          { label: "Time", value: formatDuration(minutes) },
+          { label: "Distance", value: `${Math.round((distanceM / 1000) * 10) / 10} km` },
+        ],
+      },
+      fuel: {
+        headline: Math.round(calories).toLocaleString(),
+        caption: calorieGoal ? `/ ${(calorieGoal * days).toLocaleString()} kcal` : `kcal ${period}`,
+        progress: calorieGoal ? clamp01(fuelPercent) : null,
+        details: [
+          { label: "Protein", value: `${Math.round(macros.protein_g)}g` },
+          { label: "Carbs", value: `${Math.round(macros.carbs_g)}g` },
+          { label: "Fat", value: `${Math.round(macros.fat_g)}g` },
+        ],
+      },
+      mind: {
+        headline: rating === null ? "-" : `${Math.round(rating * 10) / 10}/5`,
+        caption: moods.length ? `avg mood \u00b7 ${moods.length} check-in${moods.length === 1 ? "" : "s"}` : "No check-ins yet",
+        progress: rating === null ? null : clamp01(rating / 5),
+        details: [],
+      },
+      focus: {
+        headline: focusResult.headline,
+        caption: focusResult.caption,
+        progress: focusResult.tracked ? focusResult.percent : null,
+        details: [],
+      },
     },
   };
 }

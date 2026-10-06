@@ -1,0 +1,2318 @@
+[
+ {
+  "id": "curated-overnight-oats",
+  "name": "Overnight oats with banana",
+  "meal_types": [
+   "breakfast"
+  ],
+  "servings": 1,
+  "prep_minutes": 5,
+  "ingredients": [
+   {
+    "name": "Oats, rolled, dry",
+    "amount": 50,
+    "unit": "g",
+    "food_id": "common-oats",
+    "calories": 194.5,
+    "protein_g": 8.5,
+    "carbs_g": 33.0,
+    "fat_g": 3.5,
+    "fiber_g": 5.3,
+    "sugar_g": 0.5,
+    "saturated_fat_g": 0.6,
+    "sodium_mg": 1.0
+   },
+   {
+    "name": "Milk, whole",
+    "amount": 150,
+    "unit": "g",
+    "food_id": "common-milk",
+    "calories": 91.6,
+    "protein_g": 4.7,
+    "carbs_g": 7.4,
+    "fat_g": 4.9,
+    "fiber_g": 0.0,
+    "sugar_g": 7.2,
+    "saturated_fat_g": 2.8,
+    "sodium_mg": 64.5
+   },
+   {
+    "name": "Banana",
+    "amount": 118,
+    "unit": "g",
+    "food_id": "common-banana",
+    "calories": 105.0,
+    "protein_g": 1.3,
+    "carbs_g": 27.0,
+    "fat_g": 0.4,
+    "fiber_g": 3.1,
+    "sugar_g": 14.4,
+    "saturated_fat_g": 0.1,
+    "sodium_mg": 1.0
+   },
+   {
+    "name": "Chia seeds",
+    "amount": 10,
+    "unit": "g",
+    "food_id": "common-chia-seeds",
+    "calories": 48.3,
+    "protein_g": 1.7,
+    "carbs_g": 4.2,
+    "fat_g": 3.1,
+    "fiber_g": 3.4,
+    "sugar_g": 0.0,
+    "saturated_fat_g": 0.3,
+    "sodium_mg": 1.7
+   },
+   {
+    "name": "Honey",
+    "amount": 10,
+    "unit": "g",
+    "food_id": "common-honey",
+    "calories": 30.5,
+    "protein_g": 0.0,
+    "carbs_g": 8.2,
+    "fat_g": 0.0,
+    "fiber_g": 0.0,
+    "sugar_g": 8.2,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 0.5
+   }
+  ],
+  "instructions": [
+   "Stir the oats, milk and chia seeds together in a jar.",
+   "Refrigerate overnight.",
+   "Top with sliced banana and honey."
+  ]
+ },
+ {
+  "id": "curated-yogurt-berry-bowl",
+  "name": "Greek yogurt berry bowl",
+  "meal_types": [
+   "breakfast",
+   "snack"
+  ],
+  "servings": 1,
+  "prep_minutes": 3,
+  "ingredients": [
+   {
+    "name": "Greek yogurt, plain",
+    "amount": 170,
+    "unit": "g",
+    "food_id": "common-greek-yogurt",
+    "calories": 100.0,
+    "protein_g": 17.0,
+    "carbs_g": 6.0,
+    "fat_g": 0.7,
+    "fiber_g": 0.0,
+    "sugar_g": 6.1,
+    "saturated_fat_g": 0.7,
+    "sodium_mg": 61.0
+   },
+   {
+    "name": "Blueberries",
+    "amount": 80,
+    "unit": "g",
+    "food_id": "common-blueberries",
+    "calories": 45.6,
+    "protein_g": 0.6,
+    "carbs_g": 11.6,
+    "fat_g": 0.2,
+    "fiber_g": 1.9,
+    "sugar_g": 8.0,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 0.8
+   },
+   {
+    "name": "Granola",
+    "amount": 30,
+    "unit": "g",
+    "food_id": "common-granola",
+    "calories": 141.6,
+    "protein_g": 3.0,
+    "carbs_g": 19.2,
+    "fat_g": 6.0,
+    "fiber_g": 2.1,
+    "sugar_g": 7.2,
+    "saturated_fat_g": 1.1,
+    "sodium_mg": 7.8
+   },
+   {
+    "name": "Honey",
+    "amount": 10,
+    "unit": "g",
+    "food_id": "common-honey",
+    "calories": 30.5,
+    "protein_g": 0.0,
+    "carbs_g": 8.2,
+    "fat_g": 0.0,
+    "fiber_g": 0.0,
+    "sugar_g": 8.2,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 0.5
+   }
+  ],
+  "instructions": [
+   "Spoon the yogurt into a bowl.",
+   "Add the blueberries and granola.",
+   "Drizzle with honey."
+  ]
+ },
+ {
+  "id": "curated-veggie-omelette",
+  "name": "Spinach and tomato omelette",
+  "meal_types": [
+   "breakfast"
+  ],
+  "servings": 1,
+  "prep_minutes": 10,
+  "ingredients": [
+   {
+    "name": "Egg, large",
+    "amount": 150,
+    "unit": "g",
+    "food_id": "common-egg",
+    "calories": 234.0,
+    "protein_g": 18.9,
+    "carbs_g": 1.8,
+    "fat_g": 15.9,
+    "fiber_g": 0.0,
+    "sugar_g": 0.6,
+    "saturated_fat_g": 4.8,
+    "sodium_mg": 186.0
+   },
+   {
+    "name": "Spinach, raw",
+    "amount": 40,
+    "unit": "g",
+    "food_id": "common-spinach",
+    "calories": 9.2,
+    "protein_g": 1.2,
+    "carbs_g": 1.4,
+    "fat_g": 0.2,
+    "fiber_g": 0.9,
+    "sugar_g": 0.2,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 31.6
+   },
+   {
+    "name": "Tomato",
+    "amount": 60,
+    "unit": "g",
+    "food_id": "common-tomato",
+    "calories": 10.8,
+    "protein_g": 0.5,
+    "carbs_g": 2.3,
+    "fat_g": 0.1,
+    "fiber_g": 0.7,
+    "sugar_g": 1.6,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 3.0
+   },
+   {
+    "name": "Mozzarella cheese",
+    "amount": 20,
+    "unit": "g",
+    "food_id": "common-mozzarella",
+    "calories": 55.7,
+    "protein_g": 5.6,
+    "carbs_g": 0.6,
+    "fat_g": 3.4,
+    "fiber_g": 0.0,
+    "sugar_g": 0.2,
+    "saturated_fat_g": 2.2,
+    "sodium_mg": 125.7
+   },
+   {
+    "name": "Olive oil",
+    "amount": 5,
+    "unit": "g",
+    "food_id": "common-olive-oil",
+    "calories": 44.3,
+    "protein_g": 0.0,
+    "carbs_g": 0.0,
+    "fat_g": 5.0,
+    "fiber_g": 0.0,
+    "sugar_g": 0.0,
+    "saturated_fat_g": 0.7,
+    "sodium_mg": 0.0
+   }
+  ],
+  "instructions": [
+   "Whisk the eggs.",
+   "Soften the spinach and tomato in the oil.",
+   "Pour in the eggs, add the cheese and fold when set."
+  ]
+ },
+ {
+  "id": "curated-pb-banana-toast",
+  "name": "Peanut butter banana toast",
+  "meal_types": [
+   "breakfast",
+   "snack"
+  ],
+  "servings": 1,
+  "prep_minutes": 5,
+  "ingredients": [
+   {
+    "name": "Bread, whole wheat",
+    "amount": 56,
+    "unit": "g",
+    "food_id": "common-whole-wheat-bread",
+    "calories": 138.0,
+    "protein_g": 7.2,
+    "carbs_g": 24.0,
+    "fat_g": 2.0,
+    "fiber_g": 3.4,
+    "sugar_g": 3.2,
+    "saturated_fat_g": 0.4,
+    "sodium_mg": 252.0
+   },
+   {
+    "name": "Peanut butter",
+    "amount": 32,
+    "unit": "g",
+    "food_id": "common-peanut-butter",
+    "calories": 188.0,
+    "protein_g": 8.0,
+    "carbs_g": 6.0,
+    "fat_g": 16.0,
+    "fiber_g": 1.9,
+    "sugar_g": 2.9,
+    "saturated_fat_g": 1.1,
+    "sodium_mg": 138.0
+   },
+   {
+    "name": "Banana",
+    "amount": 118,
+    "unit": "g",
+    "food_id": "common-banana",
+    "calories": 105.0,
+    "protein_g": 1.3,
+    "carbs_g": 27.0,
+    "fat_g": 0.4,
+    "fiber_g": 3.1,
+    "sugar_g": 14.4,
+    "saturated_fat_g": 0.1,
+    "sodium_mg": 1.0
+   }
+  ],
+  "instructions": [
+   "Toast the bread.",
+   "Spread with peanut butter.",
+   "Top with sliced banana."
+  ]
+ },
+ {
+  "id": "curated-cottage-berries",
+  "name": "Cottage cheese with berries and walnuts",
+  "meal_types": [
+   "breakfast",
+   "snack"
+  ],
+  "servings": 1,
+  "prep_minutes": 3,
+  "ingredients": [
+   {
+    "name": "Cottage cheese, low-fat",
+    "amount": 150,
+    "unit": "g",
+    "food_id": "common-cottage-cheese",
+    "calories": 108.0,
+    "protein_g": 18.6,
+    "carbs_g": 4.1,
+    "fat_g": 1.5,
+    "fiber_g": 0.0,
+    "sugar_g": 4.1,
+    "saturated_fat_g": 0.9,
+    "sodium_mg": 609.0
+   },
+   {
+    "name": "Strawberries",
+    "amount": 100,
+    "unit": "g",
+    "food_id": "common-strawberries",
+    "calories": 32.0,
+    "protein_g": 0.7,
+    "carbs_g": 7.7,
+    "fat_g": 0.3,
+    "fiber_g": 2.0,
+    "sugar_g": 4.9,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 1.0
+   },
+   {
+    "name": "Walnuts",
+    "amount": 15,
+    "unit": "g",
+    "food_id": "common-walnuts",
+    "calories": 98.0,
+    "protein_g": 2.2,
+    "carbs_g": 2.1,
+    "fat_g": 9.8,
+    "fiber_g": 1.0,
+    "sugar_g": 0.4,
+    "saturated_fat_g": 0.9,
+    "sodium_mg": 0.5
+   }
+  ],
+  "instructions": [
+   "Put the cottage cheese in a bowl.",
+   "Top with sliced strawberries and chopped walnuts."
+  ]
+ },
+ {
+  "id": "curated-avocado-egg-toast",
+  "name": "Avocado and egg toast",
+  "meal_types": [
+   "breakfast"
+  ],
+  "servings": 1,
+  "prep_minutes": 10,
+  "ingredients": [
+   {
+    "name": "Bread, whole wheat",
+    "amount": 56,
+    "unit": "g",
+    "food_id": "common-whole-wheat-bread",
+    "calories": 138.0,
+    "protein_g": 7.2,
+    "carbs_g": 24.0,
+    "fat_g": 2.0,
+    "fiber_g": 3.4,
+    "sugar_g": 3.2,
+    "saturated_fat_g": 0.4,
+    "sodium_mg": 252.0
+   },
+   {
+    "name": "Avocado",
+    "amount": 75,
+    "unit": "g",
+    "food_id": "common-avocado",
+    "calories": 120.0,
+    "protein_g": 1.5,
+    "carbs_g": 6.4,
+    "fat_g": 11.0,
+    "fiber_g": 5.0,
+    "sugar_g": 0.6,
+    "saturated_fat_g": 1.6,
+    "sodium_mg": 5.0
+   },
+   {
+    "name": "Egg, large",
+    "amount": 100,
+    "unit": "g",
+    "food_id": "common-egg",
+    "calories": 156.0,
+    "protein_g": 12.6,
+    "carbs_g": 1.2,
+    "fat_g": 10.6,
+    "fiber_g": 0.0,
+    "sugar_g": 0.4,
+    "saturated_fat_g": 3.2,
+    "sodium_mg": 124.0
+   },
+   {
+    "name": "Tomato",
+    "amount": 40,
+    "unit": "g",
+    "food_id": "common-tomato",
+    "calories": 7.2,
+    "protein_g": 0.4,
+    "carbs_g": 1.6,
+    "fat_g": 0.1,
+    "fiber_g": 0.5,
+    "sugar_g": 1.0,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 2.0
+   }
+  ],
+  "instructions": [
+   "Toast the bread and mash the avocado on top.",
+   "Cook the eggs to your liking.",
+   "Add the eggs and sliced tomato."
+  ]
+ },
+ {
+  "id": "curated-skyr-smoothie-bowl",
+  "name": "Skyr and raspberry smoothie bowl",
+  "meal_types": [
+   "breakfast"
+  ],
+  "servings": 1,
+  "prep_minutes": 5,
+  "ingredients": [
+   {
+    "name": "Skyr, plain",
+    "amount": 150,
+    "unit": "g",
+    "food_id": "common-skyr",
+    "calories": 94.0,
+    "protein_g": 16.5,
+    "carbs_g": 6.0,
+    "fat_g": 0.3,
+    "fiber_g": 0.0,
+    "sugar_g": 6.0,
+    "saturated_fat_g": 0.1,
+    "sodium_mg": 60.0
+   },
+   {
+    "name": "Banana",
+    "amount": 118,
+    "unit": "g",
+    "food_id": "common-banana",
+    "calories": 105.0,
+    "protein_g": 1.3,
+    "carbs_g": 27.0,
+    "fat_g": 0.4,
+    "fiber_g": 3.1,
+    "sugar_g": 14.4,
+    "saturated_fat_g": 0.1,
+    "sodium_mg": 1.0
+   },
+   {
+    "name": "Raspberries",
+    "amount": 80,
+    "unit": "g",
+    "food_id": "common-raspberries",
+    "calories": 41.6,
+    "protein_g": 1.0,
+    "carbs_g": 9.5,
+    "fat_g": 0.6,
+    "fiber_g": 5.2,
+    "sugar_g": 3.5,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 0.8
+   },
+   {
+    "name": "Oats, rolled, dry",
+    "amount": 30,
+    "unit": "g",
+    "food_id": "common-oats",
+    "calories": 116.7,
+    "protein_g": 5.1,
+    "carbs_g": 19.8,
+    "fat_g": 2.1,
+    "fiber_g": 3.2,
+    "sugar_g": 0.3,
+    "saturated_fat_g": 0.4,
+    "sodium_mg": 0.6
+   },
+   {
+    "name": "Almond milk, unsweetened",
+    "amount": 100,
+    "unit": "ml",
+    "food_id": "common-almond-milk",
+    "calories": 12.9,
+    "protein_g": 0.4,
+    "carbs_g": 0.3,
+    "fat_g": 1.1,
+    "fiber_g": 0.2,
+    "sugar_g": 0.0,
+    "saturated_fat_g": 0.1,
+    "sodium_mg": 67.1
+   }
+  ],
+  "instructions": [
+   "Blend the skyr, banana, half the raspberries and the almond milk.",
+   "Pour into a bowl.",
+   "Top with the oats and remaining raspberries."
+  ]
+ },
+ {
+  "id": "curated-chicken-rice-bowl",
+  "name": "Chicken and rice bowl",
+  "meal_types": [
+   "lunch",
+   "dinner"
+  ],
+  "servings": 1,
+  "prep_minutes": 25,
+  "ingredients": [
+   {
+    "name": "Chicken breast, cooked",
+    "amount": 150,
+    "unit": "g",
+    "food_id": "common-chicken-breast",
+    "calories": 247.5,
+    "protein_g": 46.5,
+    "carbs_g": 0.0,
+    "fat_g": 5.4,
+    "fiber_g": 0.0,
+    "sugar_g": 0.0,
+    "saturated_fat_g": 1.5,
+    "sodium_mg": 111.0
+   },
+   {
+    "name": "White rice, cooked",
+    "amount": 150,
+    "unit": "g",
+    "food_id": "common-white-rice",
+    "calories": 195.0,
+    "protein_g": 4.1,
+    "carbs_g": 42.0,
+    "fat_g": 0.4,
+    "fiber_g": 0.6,
+    "sugar_g": 0.0,
+    "saturated_fat_g": 0.2,
+    "sodium_mg": 1.5
+   },
+   {
+    "name": "Broccoli, cooked",
+    "amount": 100,
+    "unit": "g",
+    "food_id": "common-broccoli",
+    "calories": 35.0,
+    "protein_g": 2.4,
+    "carbs_g": 7.2,
+    "fat_g": 0.4,
+    "fiber_g": 3.3,
+    "sugar_g": 1.4,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 41.0
+   },
+   {
+    "name": "Olive oil",
+    "amount": 10,
+    "unit": "g",
+    "food_id": "common-olive-oil",
+    "calories": 88.6,
+    "protein_g": 0.0,
+    "carbs_g": 0.0,
+    "fat_g": 10.0,
+    "fiber_g": 0.0,
+    "sugar_g": 0.0,
+    "saturated_fat_g": 1.4,
+    "sodium_mg": 0.0
+   }
+  ],
+  "instructions": [
+   "Cook the rice and steam the broccoli.",
+   "Slice the cooked chicken.",
+   "Serve together with a drizzle of oil."
+  ]
+ },
+ {
+  "id": "curated-tuna-chickpea-salad",
+  "name": "Tuna and chickpea salad",
+  "meal_types": [
+   "lunch"
+  ],
+  "servings": 1,
+  "prep_minutes": 10,
+  "ingredients": [
+   {
+    "name": "Tuna, canned in water",
+    "amount": 100,
+    "unit": "g",
+    "food_id": "common-tuna-canned",
+    "calories": 116.0,
+    "protein_g": 26.0,
+    "carbs_g": 0.0,
+    "fat_g": 1.0,
+    "fiber_g": 0.0,
+    "sugar_g": 0.0,
+    "saturated_fat_g": 0.2,
+    "sodium_mg": 247.0
+   },
+   {
+    "name": "Chickpeas, cooked",
+    "amount": 120,
+    "unit": "g",
+    "food_id": "common-chickpeas",
+    "calories": 196.8,
+    "protein_g": 10.7,
+    "carbs_g": 32.4,
+    "fat_g": 3.1,
+    "fiber_g": 9.1,
+    "sugar_g": 5.8,
+    "saturated_fat_g": 0.4,
+    "sodium_mg": 8.4
+   },
+   {
+    "name": "Cucumber",
+    "amount": 80,
+    "unit": "g",
+    "food_id": "common-cucumber",
+    "calories": 12.0,
+    "protein_g": 0.6,
+    "carbs_g": 2.9,
+    "fat_g": 0.1,
+    "fiber_g": 0.4,
+    "sugar_g": 1.4,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 1.6
+   },
+   {
+    "name": "Tomato",
+    "amount": 100,
+    "unit": "g",
+    "food_id": "common-tomato",
+    "calories": 18.0,
+    "protein_g": 0.9,
+    "carbs_g": 3.9,
+    "fat_g": 0.2,
+    "fiber_g": 1.2,
+    "sugar_g": 2.6,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 5.0
+   },
+   {
+    "name": "Onion",
+    "amount": 20,
+    "unit": "g",
+    "food_id": "common-onion",
+    "calories": 8.0,
+    "protein_g": 0.2,
+    "carbs_g": 1.9,
+    "fat_g": 0.0,
+    "fiber_g": 0.3,
+    "sugar_g": 0.8,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 0.8
+   },
+   {
+    "name": "Olive oil",
+    "amount": 10,
+    "unit": "g",
+    "food_id": "common-olive-oil",
+    "calories": 88.6,
+    "protein_g": 0.0,
+    "carbs_g": 0.0,
+    "fat_g": 10.0,
+    "fiber_g": 0.0,
+    "sugar_g": 0.0,
+    "saturated_fat_g": 1.4,
+    "sodium_mg": 0.0
+   },
+   {
+    "name": "Lettuce, romaine",
+    "amount": 40,
+    "unit": "g",
+    "food_id": "common-lettuce",
+    "calories": 6.8,
+    "protein_g": 0.5,
+    "carbs_g": 1.3,
+    "fat_g": 0.1,
+    "fiber_g": 0.8,
+    "sugar_g": 0.5,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 3.2
+   }
+  ],
+  "instructions": [
+   "Chop the vegetables and shred the lettuce.",
+   "Combine with the tuna and chickpeas.",
+   "Dress with the olive oil."
+  ]
+ },
+ {
+  "id": "curated-quinoa-veggie-bowl",
+  "name": "Quinoa vegetable bowl",
+  "meal_types": [
+   "lunch"
+  ],
+  "servings": 1,
+  "prep_minutes": 20,
+  "ingredients": [
+   {
+    "name": "Quinoa, cooked",
+    "amount": 150,
+    "unit": "g",
+    "food_id": "common-quinoa",
+    "calories": 180.0,
+    "protein_g": 6.6,
+    "carbs_g": 31.5,
+    "fat_g": 2.8,
+    "fiber_g": 4.2,
+    "sugar_g": 1.4,
+    "saturated_fat_g": 0.3,
+    "sodium_mg": 10.5
+   },
+   {
+    "name": "Chickpeas, cooked",
+    "amount": 100,
+    "unit": "g",
+    "food_id": "common-chickpeas",
+    "calories": 164.0,
+    "protein_g": 8.9,
+    "carbs_g": 27.0,
+    "fat_g": 2.6,
+    "fiber_g": 7.6,
+    "sugar_g": 4.8,
+    "saturated_fat_g": 0.3,
+    "sodium_mg": 7.0
+   },
+   {
+    "name": "Bell pepper, red",
+    "amount": 80,
+    "unit": "g",
+    "food_id": "common-bell-pepper",
+    "calories": 24.8,
+    "protein_g": 0.8,
+    "carbs_g": 4.8,
+    "fat_g": 0.2,
+    "fiber_g": 1.7,
+    "sugar_g": 3.4,
+    "saturated_fat_g": 0.1,
+    "sodium_mg": 3.2
+   },
+   {
+    "name": "Cucumber",
+    "amount": 60,
+    "unit": "g",
+    "food_id": "common-cucumber",
+    "calories": 9.0,
+    "protein_g": 0.4,
+    "carbs_g": 2.2,
+    "fat_g": 0.1,
+    "fiber_g": 0.3,
+    "sugar_g": 1.0,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 1.2
+   },
+   {
+    "name": "Feta cheese",
+    "amount": 30,
+    "unit": "g",
+    "food_id": "common-feta",
+    "calories": 79.3,
+    "protein_g": 4.2,
+    "carbs_g": 1.2,
+    "fat_g": 6.3,
+    "fiber_g": 0.0,
+    "sugar_g": 1.2,
+    "saturated_fat_g": 4.5,
+    "sodium_mg": 275.4
+   },
+   {
+    "name": "Olive oil",
+    "amount": 10,
+    "unit": "g",
+    "food_id": "common-olive-oil",
+    "calories": 88.6,
+    "protein_g": 0.0,
+    "carbs_g": 0.0,
+    "fat_g": 10.0,
+    "fiber_g": 0.0,
+    "sugar_g": 0.0,
+    "saturated_fat_g": 1.4,
+    "sodium_mg": 0.0
+   }
+  ],
+  "instructions": [
+   "Cook the quinoa and let it cool slightly.",
+   "Dice the vegetables.",
+   "Toss everything together and crumble the feta on top."
+  ]
+ },
+ {
+  "id": "curated-turkey-hummus-wraps",
+  "name": "Turkey and hummus wraps",
+  "meal_types": [
+   "lunch"
+  ],
+  "servings": 1,
+  "prep_minutes": 8,
+  "ingredients": [
+   {
+    "name": "Tortilla, flour",
+    "amount": 90,
+    "unit": "g",
+    "food_id": "common-tortilla",
+    "calories": 274.0,
+    "protein_g": 7.2,
+    "carbs_g": 45.0,
+    "fat_g": 7.2,
+    "fiber_g": 2.8,
+    "sugar_g": 2.8,
+    "saturated_fat_g": 2.2,
+    "sodium_mg": 630.0
+   },
+   {
+    "name": "Turkey breast, roasted",
+    "amount": 100,
+    "unit": "g",
+    "food_id": "common-turkey-breast",
+    "calories": 135.0,
+    "protein_g": 30.0,
+    "carbs_g": 0.0,
+    "fat_g": 1.0,
+    "fiber_g": 0.0,
+    "sugar_g": 0.0,
+    "saturated_fat_g": 0.3,
+    "sodium_mg": 55.0
+   },
+   {
+    "name": "Hummus",
+    "amount": 40,
+    "unit": "g",
+    "food_id": "common-hummus",
+    "calories": 66.7,
+    "protein_g": 3.2,
+    "carbs_g": 5.6,
+    "fat_g": 3.9,
+    "fiber_g": 2.4,
+    "sugar_g": 0.1,
+    "saturated_fat_g": 0.5,
+    "sodium_mg": 152.0
+   },
+   {
+    "name": "Lettuce, romaine",
+    "amount": 40,
+    "unit": "g",
+    "food_id": "common-lettuce",
+    "calories": 6.8,
+    "protein_g": 0.5,
+    "carbs_g": 1.3,
+    "fat_g": 0.1,
+    "fiber_g": 0.8,
+    "sugar_g": 0.5,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 3.2
+   },
+   {
+    "name": "Tomato",
+    "amount": 60,
+    "unit": "g",
+    "food_id": "common-tomato",
+    "calories": 10.8,
+    "protein_g": 0.5,
+    "carbs_g": 2.3,
+    "fat_g": 0.1,
+    "fiber_g": 0.7,
+    "sugar_g": 1.6,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 3.0
+   }
+  ],
+  "instructions": [
+   "Spread the hummus over the tortillas.",
+   "Layer the turkey, lettuce and tomato.",
+   "Roll up and slice in half."
+  ]
+ },
+ {
+  "id": "curated-lentil-soup",
+  "name": "Tomato lentil soup",
+  "meal_types": [
+   "lunch",
+   "dinner"
+  ],
+  "servings": 2,
+  "prep_minutes": 30,
+  "ingredients": [
+   {
+    "name": "Lentils, cooked",
+    "amount": 400,
+    "unit": "g",
+    "food_id": "common-lentils",
+    "calories": 464.0,
+    "protein_g": 36.0,
+    "carbs_g": 80.0,
+    "fat_g": 1.6,
+    "fiber_g": 31.6,
+    "sugar_g": 7.2,
+    "saturated_fat_g": 0.4,
+    "sodium_mg": 8.0
+   },
+   {
+    "name": "Carrot, raw",
+    "amount": 160,
+    "unit": "g",
+    "food_id": "common-carrot",
+    "calories": 65.6,
+    "protein_g": 1.4,
+    "carbs_g": 15.4,
+    "fat_g": 0.3,
+    "fiber_g": 4.5,
+    "sugar_g": 7.5,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 110.4
+   },
+   {
+    "name": "Onion",
+    "amount": 100,
+    "unit": "g",
+    "food_id": "common-onion",
+    "calories": 40.0,
+    "protein_g": 1.1,
+    "carbs_g": 9.3,
+    "fat_g": 0.1,
+    "fiber_g": 1.7,
+    "sugar_g": 4.2,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 4.0
+   },
+   {
+    "name": "Tomato passata",
+    "amount": 300,
+    "unit": "g",
+    "food_id": "common-tomato-passata",
+    "calories": 96.0,
+    "protein_g": 4.5,
+    "carbs_g": 19.8,
+    "fat_g": 0.6,
+    "fiber_g": 5.1,
+    "sugar_g": 14.4,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 450.0
+   },
+   {
+    "name": "Olive oil",
+    "amount": 20,
+    "unit": "g",
+    "food_id": "common-olive-oil",
+    "calories": 177.1,
+    "protein_g": 0.0,
+    "carbs_g": 0.0,
+    "fat_g": 20.0,
+    "fiber_g": 0.0,
+    "sugar_g": 0.0,
+    "saturated_fat_g": 2.7,
+    "sodium_mg": 0.0
+   }
+  ],
+  "instructions": [
+   "Soften the onion and carrot in the oil.",
+   "Add the passata, lentils and a cup of water.",
+   "Simmer for 15 minutes and blend if you like it smooth."
+  ]
+ },
+ {
+  "id": "curated-tofu-stir-fry",
+  "name": "Tofu stir-fry with brown rice",
+  "meal_types": [
+   "lunch",
+   "dinner"
+  ],
+  "servings": 1,
+  "prep_minutes": 25,
+  "ingredients": [
+   {
+    "name": "Tofu, firm",
+    "amount": 150,
+    "unit": "g",
+    "food_id": "common-tofu",
+    "calories": 216.0,
+    "protein_g": 23.5,
+    "carbs_g": 4.9,
+    "fat_g": 13.0,
+    "fiber_g": 3.4,
+    "sugar_g": 0.9,
+    "saturated_fat_g": 2.0,
+    "sodium_mg": 21.0
+   },
+   {
+    "name": "Brown rice, cooked",
+    "amount": 150,
+    "unit": "g",
+    "food_id": "common-brown-rice",
+    "calories": 184.5,
+    "protein_g": 4.1,
+    "carbs_g": 39.0,
+    "fat_g": 1.5,
+    "fiber_g": 2.4,
+    "sugar_g": 0.3,
+    "saturated_fat_g": 0.3,
+    "sodium_mg": 6.0
+   },
+   {
+    "name": "Broccoli, cooked",
+    "amount": 100,
+    "unit": "g",
+    "food_id": "common-broccoli",
+    "calories": 35.0,
+    "protein_g": 2.4,
+    "carbs_g": 7.2,
+    "fat_g": 0.4,
+    "fiber_g": 3.3,
+    "sugar_g": 1.4,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 41.0
+   },
+   {
+    "name": "Bell pepper, red",
+    "amount": 80,
+    "unit": "g",
+    "food_id": "common-bell-pepper",
+    "calories": 24.8,
+    "protein_g": 0.8,
+    "carbs_g": 4.8,
+    "fat_g": 0.2,
+    "fiber_g": 1.7,
+    "sugar_g": 3.4,
+    "saturated_fat_g": 0.1,
+    "sodium_mg": 3.2
+   },
+   {
+    "name": "Soy sauce",
+    "amount": 15,
+    "unit": "ml",
+    "food_id": "common-soy-sauce",
+    "calories": 8.0,
+    "protein_g": 1.2,
+    "carbs_g": 0.7,
+    "fat_g": 0.1,
+    "fiber_g": 0.1,
+    "sugar_g": 0.1,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 824.0
+   },
+   {
+    "name": "Olive oil",
+    "amount": 10,
+    "unit": "g",
+    "food_id": "common-olive-oil",
+    "calories": 88.6,
+    "protein_g": 0.0,
+    "carbs_g": 0.0,
+    "fat_g": 10.0,
+    "fiber_g": 0.0,
+    "sugar_g": 0.0,
+    "saturated_fat_g": 1.4,
+    "sodium_mg": 0.0
+   }
+  ],
+  "instructions": [
+   "Brown the cubed tofu in the oil.",
+   "Add the vegetables and cook until tender.",
+   "Stir in the soy sauce and serve over the rice."
+  ]
+ },
+ {
+  "id": "curated-greek-salad",
+  "name": "Greek salad",
+  "meal_types": [
+   "lunch",
+   "snack"
+  ],
+  "servings": 1,
+  "prep_minutes": 8,
+  "ingredients": [
+   {
+    "name": "Tomato",
+    "amount": 150,
+    "unit": "g",
+    "food_id": "common-tomato",
+    "calories": 27.0,
+    "protein_g": 1.4,
+    "carbs_g": 5.8,
+    "fat_g": 0.3,
+    "fiber_g": 1.8,
+    "sugar_g": 3.9,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 7.5
+   },
+   {
+    "name": "Cucumber",
+    "amount": 100,
+    "unit": "g",
+    "food_id": "common-cucumber",
+    "calories": 15.0,
+    "protein_g": 0.7,
+    "carbs_g": 3.6,
+    "fat_g": 0.1,
+    "fiber_g": 0.5,
+    "sugar_g": 1.7,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 2.0
+   },
+   {
+    "name": "Feta cheese",
+    "amount": 40,
+    "unit": "g",
+    "food_id": "common-feta",
+    "calories": 105.7,
+    "protein_g": 5.6,
+    "carbs_g": 1.6,
+    "fat_g": 8.4,
+    "fiber_g": 0.0,
+    "sugar_g": 1.6,
+    "saturated_fat_g": 6.0,
+    "sodium_mg": 367.1
+   },
+   {
+    "name": "Olive oil",
+    "amount": 10,
+    "unit": "g",
+    "food_id": "common-olive-oil",
+    "calories": 88.6,
+    "protein_g": 0.0,
+    "carbs_g": 0.0,
+    "fat_g": 10.0,
+    "fiber_g": 0.0,
+    "sugar_g": 0.0,
+    "saturated_fat_g": 1.4,
+    "sodium_mg": 0.0
+   },
+   {
+    "name": "Onion",
+    "amount": 20,
+    "unit": "g",
+    "food_id": "common-onion",
+    "calories": 8.0,
+    "protein_g": 0.2,
+    "carbs_g": 1.9,
+    "fat_g": 0.0,
+    "fiber_g": 0.3,
+    "sugar_g": 0.8,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 0.8
+   }
+  ],
+  "instructions": [
+   "Chop the tomato and cucumber into chunks.",
+   "Slice the onion thinly.",
+   "Top with feta and olive oil."
+  ]
+ },
+ {
+  "id": "curated-black-bean-bowl",
+  "name": "Black bean burrito bowl",
+  "meal_types": [
+   "lunch",
+   "dinner"
+  ],
+  "servings": 1,
+  "prep_minutes": 15,
+  "ingredients": [
+   {
+    "name": "Black beans, cooked",
+    "amount": 120,
+    "unit": "g",
+    "food_id": "common-black-beans",
+    "calories": 158.4,
+    "protein_g": 10.7,
+    "carbs_g": 28.8,
+    "fat_g": 0.6,
+    "fiber_g": 10.4,
+    "sugar_g": 0.4,
+    "saturated_fat_g": 0.1,
+    "sodium_mg": 1.2
+   },
+   {
+    "name": "White rice, cooked",
+    "amount": 120,
+    "unit": "g",
+    "food_id": "common-white-rice",
+    "calories": 156.0,
+    "protein_g": 3.2,
+    "carbs_g": 33.6,
+    "fat_g": 0.4,
+    "fiber_g": 0.5,
+    "sugar_g": 0.0,
+    "saturated_fat_g": 0.1,
+    "sodium_mg": 1.2
+   },
+   {
+    "name": "Sweet corn, cooked",
+    "amount": 60,
+    "unit": "g",
+    "food_id": "common-sweet-corn",
+    "calories": 57.6,
+    "protein_g": 2.0,
+    "carbs_g": 12.6,
+    "fat_g": 0.9,
+    "fiber_g": 1.4,
+    "sugar_g": 2.7,
+    "saturated_fat_g": 0.1,
+    "sodium_mg": 0.6
+   },
+   {
+    "name": "Avocado",
+    "amount": 50,
+    "unit": "g",
+    "food_id": "common-avocado",
+    "calories": 80.0,
+    "protein_g": 1.0,
+    "carbs_g": 4.3,
+    "fat_g": 7.3,
+    "fiber_g": 3.4,
+    "sugar_g": 0.4,
+    "saturated_fat_g": 1.0,
+    "sodium_mg": 3.3
+   },
+   {
+    "name": "Tomato",
+    "amount": 80,
+    "unit": "g",
+    "food_id": "common-tomato",
+    "calories": 14.4,
+    "protein_g": 0.7,
+    "carbs_g": 3.1,
+    "fat_g": 0.2,
+    "fiber_g": 1.0,
+    "sugar_g": 2.1,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 4.0
+   }
+  ],
+  "instructions": [
+   "Warm the beans and corn.",
+   "Spoon over the rice.",
+   "Top with diced tomato and avocado."
+  ]
+ },
+ {
+  "id": "curated-salmon-sweet-potato",
+  "name": "Baked salmon with sweet potato",
+  "meal_types": [
+   "dinner"
+  ],
+  "servings": 1,
+  "prep_minutes": 30,
+  "ingredients": [
+   {
+    "name": "Salmon, cooked",
+    "amount": 150,
+    "unit": "g",
+    "food_id": "common-salmon",
+    "calories": 309.0,
+    "protein_g": 33.0,
+    "carbs_g": 0.0,
+    "fat_g": 19.5,
+    "fiber_g": 0.0,
+    "sugar_g": 0.0,
+    "saturated_fat_g": 4.7,
+    "sodium_mg": 91.5
+   },
+   {
+    "name": "Sweet potato, baked",
+    "amount": 200,
+    "unit": "g",
+    "food_id": "common-sweet-potato",
+    "calories": 180.0,
+    "protein_g": 4.0,
+    "carbs_g": 42.0,
+    "fat_g": 0.4,
+    "fiber_g": 6.6,
+    "sugar_g": 13.0,
+    "saturated_fat_g": 0.2,
+    "sodium_mg": 72.0
+   },
+   {
+    "name": "Asparagus, cooked",
+    "amount": 100,
+    "unit": "g",
+    "food_id": "common-asparagus",
+    "calories": 22.0,
+    "protein_g": 2.4,
+    "carbs_g": 4.1,
+    "fat_g": 0.2,
+    "fiber_g": 2.0,
+    "sugar_g": 1.3,
+    "saturated_fat_g": 0.1,
+    "sodium_mg": 14.0
+   },
+   {
+    "name": "Olive oil",
+    "amount": 10,
+    "unit": "g",
+    "food_id": "common-olive-oil",
+    "calories": 88.6,
+    "protein_g": 0.0,
+    "carbs_g": 0.0,
+    "fat_g": 10.0,
+    "fiber_g": 0.0,
+    "sugar_g": 0.0,
+    "saturated_fat_g": 1.4,
+    "sodium_mg": 0.0
+   }
+  ],
+  "instructions": [
+   "Roast the sweet potato wedges at 200C for 15 minutes.",
+   "Add the salmon and asparagus with the oil.",
+   "Roast for 12 more minutes."
+  ]
+ },
+ {
+  "id": "curated-chicken-noodle-stir-fry",
+  "name": "Chicken noodle stir-fry",
+  "meal_types": [
+   "dinner"
+  ],
+  "servings": 1,
+  "prep_minutes": 20,
+  "ingredients": [
+   {
+    "name": "Chicken breast, cooked",
+    "amount": 150,
+    "unit": "g",
+    "food_id": "common-chicken-breast",
+    "calories": 247.5,
+    "protein_g": 46.5,
+    "carbs_g": 0.0,
+    "fat_g": 5.4,
+    "fiber_g": 0.0,
+    "sugar_g": 0.0,
+    "saturated_fat_g": 1.5,
+    "sodium_mg": 111.0
+   },
+   {
+    "name": "Rice noodles, cooked",
+    "amount": 150,
+    "unit": "g",
+    "food_id": "common-rice-noodles",
+    "calories": 162.0,
+    "protein_g": 1.4,
+    "carbs_g": 37.5,
+    "fat_g": 0.3,
+    "fiber_g": 1.5,
+    "sugar_g": 0.0,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 1.5
+   },
+   {
+    "name": "Bell pepper, red",
+    "amount": 80,
+    "unit": "g",
+    "food_id": "common-bell-pepper",
+    "calories": 24.8,
+    "protein_g": 0.8,
+    "carbs_g": 4.8,
+    "fat_g": 0.2,
+    "fiber_g": 1.7,
+    "sugar_g": 3.4,
+    "saturated_fat_g": 0.1,
+    "sodium_mg": 3.2
+   },
+   {
+    "name": "Green beans, cooked",
+    "amount": 80,
+    "unit": "g",
+    "food_id": "common-green-beans",
+    "calories": 28.0,
+    "protein_g": 1.5,
+    "carbs_g": 6.3,
+    "fat_g": 0.2,
+    "fiber_g": 2.6,
+    "sugar_g": 1.3,
+    "saturated_fat_g": 0.1,
+    "sodium_mg": 0.8
+   },
+   {
+    "name": "Soy sauce",
+    "amount": 15,
+    "unit": "ml",
+    "food_id": "common-soy-sauce",
+    "calories": 8.0,
+    "protein_g": 1.2,
+    "carbs_g": 0.7,
+    "fat_g": 0.1,
+    "fiber_g": 0.1,
+    "sugar_g": 0.1,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 824.0
+   },
+   {
+    "name": "Olive oil",
+    "amount": 10,
+    "unit": "g",
+    "food_id": "common-olive-oil",
+    "calories": 88.6,
+    "protein_g": 0.0,
+    "carbs_g": 0.0,
+    "fat_g": 10.0,
+    "fiber_g": 0.0,
+    "sugar_g": 0.0,
+    "saturated_fat_g": 1.4,
+    "sodium_mg": 0.0
+   }
+  ],
+  "instructions": [
+   "Stir-fry the chicken in the oil.",
+   "Add the vegetables, then the noodles.",
+   "Season with soy sauce."
+  ]
+ },
+ {
+  "id": "curated-steak-potato-skillet",
+  "name": "Steak and potato skillet",
+  "meal_types": [
+   "dinner"
+  ],
+  "servings": 1,
+  "prep_minutes": 30,
+  "ingredients": [
+   {
+    "name": "Beef sirloin steak, cooked",
+    "amount": 150,
+    "unit": "g",
+    "food_id": "common-beef-steak",
+    "calories": 309.0,
+    "protein_g": 45.0,
+    "carbs_g": 0.0,
+    "fat_g": 13.5,
+    "fiber_g": 0.0,
+    "sugar_g": 0.0,
+    "saturated_fat_g": 5.2,
+    "sodium_mg": 90.0
+   },
+   {
+    "name": "Potato, baked",
+    "amount": 200,
+    "unit": "g",
+    "food_id": "common-potato",
+    "calories": 186.0,
+    "protein_g": 5.0,
+    "carbs_g": 42.0,
+    "fat_g": 0.2,
+    "fiber_g": 4.4,
+    "sugar_g": 2.4,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 20.0
+   },
+   {
+    "name": "Green beans, cooked",
+    "amount": 100,
+    "unit": "g",
+    "food_id": "common-green-beans",
+    "calories": 35.0,
+    "protein_g": 1.9,
+    "carbs_g": 7.9,
+    "fat_g": 0.3,
+    "fiber_g": 3.2,
+    "sugar_g": 1.6,
+    "saturated_fat_g": 0.1,
+    "sodium_mg": 1.0
+   },
+   {
+    "name": "Olive oil",
+    "amount": 10,
+    "unit": "g",
+    "food_id": "common-olive-oil",
+    "calories": 88.6,
+    "protein_g": 0.0,
+    "carbs_g": 0.0,
+    "fat_g": 10.0,
+    "fiber_g": 0.0,
+    "sugar_g": 0.0,
+    "saturated_fat_g": 1.4,
+    "sodium_mg": 0.0
+   }
+  ],
+  "instructions": [
+   "Roast the potato chunks until golden.",
+   "Sear the steak and rest it.",
+   "Serve with steamed green beans."
+  ]
+ },
+ {
+  "id": "curated-pasta-bolognese",
+  "name": "Pasta with beef and tomato",
+  "meal_types": [
+   "dinner"
+  ],
+  "servings": 1,
+  "prep_minutes": 30,
+  "ingredients": [
+   {
+    "name": "Pasta, cooked",
+    "amount": 200,
+    "unit": "g",
+    "food_id": "common-pasta",
+    "calories": 262.0,
+    "protein_g": 10.0,
+    "carbs_g": 50.0,
+    "fat_g": 2.2,
+    "fiber_g": 3.6,
+    "sugar_g": 1.2,
+    "saturated_fat_g": 0.4,
+    "sodium_mg": 2.0
+   },
+   {
+    "name": "Ground beef, 85% lean, cooked",
+    "amount": 100,
+    "unit": "g",
+    "food_id": "common-ground-beef",
+    "calories": 215.0,
+    "protein_g": 26.0,
+    "carbs_g": 0.0,
+    "fat_g": 12.0,
+    "fiber_g": 0.0,
+    "sugar_g": 0.0,
+    "saturated_fat_g": 4.9,
+    "sodium_mg": 72.0
+   },
+   {
+    "name": "Tomato passata",
+    "amount": 150,
+    "unit": "g",
+    "food_id": "common-tomato-passata",
+    "calories": 48.0,
+    "protein_g": 2.2,
+    "carbs_g": 9.9,
+    "fat_g": 0.3,
+    "fiber_g": 2.5,
+    "sugar_g": 7.2,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 225.0
+   },
+   {
+    "name": "Onion",
+    "amount": 40,
+    "unit": "g",
+    "food_id": "common-onion",
+    "calories": 16.0,
+    "protein_g": 0.4,
+    "carbs_g": 3.7,
+    "fat_g": 0.0,
+    "fiber_g": 0.7,
+    "sugar_g": 1.7,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 1.6
+   },
+   {
+    "name": "Parmesan cheese, grated",
+    "amount": 10,
+    "unit": "g",
+    "food_id": "common-parmesan",
+    "calories": 43.0,
+    "protein_g": 3.8,
+    "carbs_g": 0.4,
+    "fat_g": 2.9,
+    "fiber_g": 0.0,
+    "sugar_g": 0.1,
+    "saturated_fat_g": 1.9,
+    "sodium_mg": 153.0
+   }
+  ],
+  "instructions": [
+   "Brown the beef with the onion.",
+   "Add the passata and simmer for 15 minutes.",
+   "Toss with the pasta and finish with parmesan."
+  ]
+ },
+ {
+  "id": "curated-shrimp-couscous",
+  "name": "Shrimp and zucchini with couscous",
+  "meal_types": [
+   "dinner"
+  ],
+  "servings": 1,
+  "prep_minutes": 15,
+  "ingredients": [
+   {
+    "name": "Shrimp, cooked",
+    "amount": 150,
+    "unit": "g",
+    "food_id": "common-shrimp",
+    "calories": 148.5,
+    "protein_g": 36.0,
+    "carbs_g": 0.3,
+    "fat_g": 0.4,
+    "fiber_g": 0.0,
+    "sugar_g": 0.0,
+    "saturated_fat_g": 0.2,
+    "sodium_mg": 166.5
+   },
+   {
+    "name": "Zucchini",
+    "amount": 150,
+    "unit": "g",
+    "food_id": "common-zucchini",
+    "calories": 25.5,
+    "protein_g": 1.8,
+    "carbs_g": 4.7,
+    "fat_g": 0.4,
+    "fiber_g": 1.5,
+    "sugar_g": 3.8,
+    "saturated_fat_g": 0.2,
+    "sodium_mg": 12.0
+   },
+   {
+    "name": "Couscous, cooked",
+    "amount": 150,
+    "unit": "g",
+    "food_id": "common-couscous",
+    "calories": 168.0,
+    "protein_g": 5.7,
+    "carbs_g": 34.5,
+    "fat_g": 0.3,
+    "fiber_g": 2.1,
+    "sugar_g": 0.2,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 7.5
+   },
+   {
+    "name": "Olive oil",
+    "amount": 10,
+    "unit": "g",
+    "food_id": "common-olive-oil",
+    "calories": 88.6,
+    "protein_g": 0.0,
+    "carbs_g": 0.0,
+    "fat_g": 10.0,
+    "fiber_g": 0.0,
+    "sugar_g": 0.0,
+    "saturated_fat_g": 1.4,
+    "sodium_mg": 0.0
+   }
+  ],
+  "instructions": [
+   "Saute the zucchini in the oil.",
+   "Add the shrimp until pink.",
+   "Serve over the couscous."
+  ]
+ },
+ {
+  "id": "curated-cod-roast-veg",
+  "name": "Cod with roasted vegetables",
+  "meal_types": [
+   "dinner"
+  ],
+  "servings": 1,
+  "prep_minutes": 35,
+  "ingredients": [
+   {
+    "name": "Cod, cooked",
+    "amount": 180,
+    "unit": "g",
+    "food_id": "common-cod",
+    "calories": 189.0,
+    "protein_g": 41.4,
+    "carbs_g": 0.0,
+    "fat_g": 1.6,
+    "fiber_g": 0.0,
+    "sugar_g": 0.0,
+    "saturated_fat_g": 0.4,
+    "sodium_mg": 140.4
+   },
+   {
+    "name": "Potato, baked",
+    "amount": 200,
+    "unit": "g",
+    "food_id": "common-potato",
+    "calories": 186.0,
+    "protein_g": 5.0,
+    "carbs_g": 42.0,
+    "fat_g": 0.2,
+    "fiber_g": 4.4,
+    "sugar_g": 2.4,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 20.0
+   },
+   {
+    "name": "Carrot, raw",
+    "amount": 100,
+    "unit": "g",
+    "food_id": "common-carrot",
+    "calories": 41.0,
+    "protein_g": 0.9,
+    "carbs_g": 9.6,
+    "fat_g": 0.2,
+    "fiber_g": 2.8,
+    "sugar_g": 4.7,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 69.0
+   },
+   {
+    "name": "Zucchini",
+    "amount": 100,
+    "unit": "g",
+    "food_id": "common-zucchini",
+    "calories": 17.0,
+    "protein_g": 1.2,
+    "carbs_g": 3.1,
+    "fat_g": 0.3,
+    "fiber_g": 1.0,
+    "sugar_g": 2.5,
+    "saturated_fat_g": 0.1,
+    "sodium_mg": 8.0
+   },
+   {
+    "name": "Olive oil",
+    "amount": 10,
+    "unit": "g",
+    "food_id": "common-olive-oil",
+    "calories": 88.6,
+    "protein_g": 0.0,
+    "carbs_g": 0.0,
+    "fat_g": 10.0,
+    "fiber_g": 0.0,
+    "sugar_g": 0.0,
+    "saturated_fat_g": 1.4,
+    "sodium_mg": 0.0
+   }
+  ],
+  "instructions": [
+   "Roast the potato and carrot for 20 minutes.",
+   "Add the zucchini and cod.",
+   "Roast 10 more minutes until the fish flakes."
+  ]
+ },
+ {
+  "id": "curated-chickpea-spinach-stew",
+  "name": "Chickpea and spinach stew",
+  "meal_types": [
+   "lunch",
+   "dinner"
+  ],
+  "servings": 2,
+  "prep_minutes": 25,
+  "ingredients": [
+   {
+    "name": "Chickpeas, cooked",
+    "amount": 250,
+    "unit": "g",
+    "food_id": "common-chickpeas",
+    "calories": 410.0,
+    "protein_g": 22.2,
+    "carbs_g": 67.5,
+    "fat_g": 6.5,
+    "fiber_g": 19.0,
+    "sugar_g": 12.0,
+    "saturated_fat_g": 0.8,
+    "sodium_mg": 17.5
+   },
+   {
+    "name": "Spinach, raw",
+    "amount": 100,
+    "unit": "g",
+    "food_id": "common-spinach",
+    "calories": 23.0,
+    "protein_g": 2.9,
+    "carbs_g": 3.6,
+    "fat_g": 0.4,
+    "fiber_g": 2.2,
+    "sugar_g": 0.4,
+    "saturated_fat_g": 0.1,
+    "sodium_mg": 79.0
+   },
+   {
+    "name": "Tomato passata",
+    "amount": 200,
+    "unit": "g",
+    "food_id": "common-tomato-passata",
+    "calories": 64.0,
+    "protein_g": 3.0,
+    "carbs_g": 13.2,
+    "fat_g": 0.4,
+    "fiber_g": 3.4,
+    "sugar_g": 9.6,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 300.0
+   },
+   {
+    "name": "Onion",
+    "amount": 60,
+    "unit": "g",
+    "food_id": "common-onion",
+    "calories": 24.0,
+    "protein_g": 0.7,
+    "carbs_g": 5.6,
+    "fat_g": 0.1,
+    "fiber_g": 1.0,
+    "sugar_g": 2.5,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 2.4
+   },
+   {
+    "name": "Olive oil",
+    "amount": 10,
+    "unit": "g",
+    "food_id": "common-olive-oil",
+    "calories": 88.6,
+    "protein_g": 0.0,
+    "carbs_g": 0.0,
+    "fat_g": 10.0,
+    "fiber_g": 0.0,
+    "sugar_g": 0.0,
+    "saturated_fat_g": 1.4,
+    "sodium_mg": 0.0
+   }
+  ],
+  "instructions": [
+   "Soften the onion in the oil.",
+   "Add the chickpeas and passata and simmer 10 minutes.",
+   "Stir in the spinach until wilted."
+  ]
+ },
+ {
+  "id": "curated-chicken-bulgur",
+  "name": "Chicken thigh with bulgur and cabbage",
+  "meal_types": [
+   "dinner"
+  ],
+  "servings": 1,
+  "prep_minutes": 30,
+  "ingredients": [
+   {
+    "name": "Chicken thigh, cooked",
+    "amount": 150,
+    "unit": "g",
+    "food_id": "common-chicken-thigh",
+    "calories": 313.5,
+    "protein_g": 39.0,
+    "carbs_g": 0.0,
+    "fat_g": 16.4,
+    "fiber_g": 0.0,
+    "sugar_g": 0.0,
+    "saturated_fat_g": 4.5,
+    "sodium_mg": 142.5
+   },
+   {
+    "name": "Bulgur, cooked",
+    "amount": 150,
+    "unit": "g",
+    "food_id": "common-bulgur",
+    "calories": 124.5,
+    "protein_g": 4.7,
+    "carbs_g": 27.9,
+    "fat_g": 0.3,
+    "fiber_g": 6.8,
+    "sugar_g": 0.2,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 7.5
+   },
+   {
+    "name": "Cabbage",
+    "amount": 100,
+    "unit": "g",
+    "food_id": "common-cabbage",
+    "calories": 25.0,
+    "protein_g": 1.3,
+    "carbs_g": 5.8,
+    "fat_g": 0.1,
+    "fiber_g": 2.5,
+    "sugar_g": 3.2,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 18.0
+   },
+   {
+    "name": "Olive oil",
+    "amount": 5,
+    "unit": "g",
+    "food_id": "common-olive-oil",
+    "calories": 44.3,
+    "protein_g": 0.0,
+    "carbs_g": 0.0,
+    "fat_g": 5.0,
+    "fiber_g": 0.0,
+    "sugar_g": 0.0,
+    "saturated_fat_g": 0.7,
+    "sodium_mg": 0.0
+   }
+  ],
+  "instructions": [
+   "Cook the bulgur.",
+   "Saute the cabbage in the oil.",
+   "Serve with the sliced cooked chicken."
+  ]
+ },
+ {
+  "id": "curated-apple-pb",
+  "name": "Apple with peanut butter",
+  "meal_types": [
+   "snack"
+  ],
+  "servings": 1,
+  "prep_minutes": 2,
+  "ingredients": [
+   {
+    "name": "Apple",
+    "amount": 182,
+    "unit": "g",
+    "food_id": "common-apple",
+    "calories": 95.0,
+    "protein_g": 0.5,
+    "carbs_g": 25.0,
+    "fat_g": 0.3,
+    "fiber_g": 4.4,
+    "sugar_g": 18.9,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 2.0
+   },
+   {
+    "name": "Peanut butter",
+    "amount": 32,
+    "unit": "g",
+    "food_id": "common-peanut-butter",
+    "calories": 188.0,
+    "protein_g": 8.0,
+    "carbs_g": 6.0,
+    "fat_g": 16.0,
+    "fiber_g": 1.9,
+    "sugar_g": 2.9,
+    "saturated_fat_g": 1.1,
+    "sodium_mg": 138.0
+   }
+  ],
+  "instructions": [
+   "Slice the apple.",
+   "Serve with the peanut butter for dipping."
+  ]
+ },
+ {
+  "id": "curated-hummus-carrots",
+  "name": "Hummus with carrot sticks",
+  "meal_types": [
+   "snack"
+  ],
+  "servings": 1,
+  "prep_minutes": 3,
+  "ingredients": [
+   {
+    "name": "Hummus",
+    "amount": 60,
+    "unit": "g",
+    "food_id": "common-hummus",
+    "calories": 100.0,
+    "protein_g": 4.8,
+    "carbs_g": 8.4,
+    "fat_g": 5.8,
+    "fiber_g": 3.6,
+    "sugar_g": 0.2,
+    "saturated_fat_g": 0.8,
+    "sodium_mg": 228.0
+   },
+   {
+    "name": "Carrot, raw",
+    "amount": 120,
+    "unit": "g",
+    "food_id": "common-carrot",
+    "calories": 49.2,
+    "protein_g": 1.1,
+    "carbs_g": 11.5,
+    "fat_g": 0.2,
+    "fiber_g": 3.4,
+    "sugar_g": 5.6,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 82.8
+   }
+  ],
+  "instructions": [
+   "Cut the carrots into sticks.",
+   "Serve with the hummus."
+  ]
+ },
+ {
+  "id": "curated-cottage-pear",
+  "name": "Cottage cheese with pear",
+  "meal_types": [
+   "snack"
+  ],
+  "servings": 1,
+  "prep_minutes": 2,
+  "ingredients": [
+   {
+    "name": "Cottage cheese, low-fat",
+    "amount": 100,
+    "unit": "g",
+    "food_id": "common-cottage-cheese",
+    "calories": 72.0,
+    "protein_g": 12.4,
+    "carbs_g": 2.7,
+    "fat_g": 1.0,
+    "fiber_g": 0.0,
+    "sugar_g": 2.7,
+    "saturated_fat_g": 0.6,
+    "sodium_mg": 406.0
+   },
+   {
+    "name": "Pear",
+    "amount": 178,
+    "unit": "g",
+    "food_id": "common-pear",
+    "calories": 101.0,
+    "protein_g": 0.7,
+    "carbs_g": 27.1,
+    "fat_g": 0.2,
+    "fiber_g": 5.5,
+    "sugar_g": 17.4,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 2.0
+   }
+  ],
+  "instructions": [
+   "Slice the pear.",
+   "Serve with the cottage cheese."
+  ]
+ },
+ {
+  "id": "curated-trail-mix",
+  "name": "Nut and chocolate trail mix",
+  "meal_types": [
+   "snack"
+  ],
+  "servings": 1,
+  "prep_minutes": 2,
+  "ingredients": [
+   {
+    "name": "Almonds",
+    "amount": 15,
+    "unit": "g",
+    "food_id": "common-almonds",
+    "calories": 87.9,
+    "protein_g": 3.2,
+    "carbs_g": 3.3,
+    "fat_g": 7.6,
+    "fiber_g": 1.9,
+    "sugar_g": 0.6,
+    "saturated_fat_g": 0.2,
+    "sodium_mg": 0.0
+   },
+   {
+    "name": "Cashews",
+    "amount": 15,
+    "unit": "g",
+    "food_id": "common-cashews",
+    "calories": 83.0,
+    "protein_g": 2.7,
+    "carbs_g": 4.5,
+    "fat_g": 6.6,
+    "fiber_g": 0.5,
+    "sugar_g": 0.9,
+    "saturated_fat_g": 1.2,
+    "sodium_mg": 1.6
+   },
+   {
+    "name": "Raisins",
+    "amount": 20,
+    "unit": "g",
+    "food_id": "common-raisins",
+    "calories": 60.0,
+    "protein_g": 0.6,
+    "carbs_g": 15.8,
+    "fat_g": 0.1,
+    "fiber_g": 0.7,
+    "sugar_g": 11.8,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 2.0
+   },
+   {
+    "name": "Dark chocolate",
+    "amount": 10,
+    "unit": "g",
+    "food_id": "common-dark-chocolate",
+    "calories": 60.0,
+    "protein_g": 0.8,
+    "carbs_g": 4.6,
+    "fat_g": 4.3,
+    "fiber_g": 1.1,
+    "sugar_g": 2.4,
+    "saturated_fat_g": 2.4,
+    "sodium_mg": 2.0
+   }
+  ],
+  "instructions": [
+   "Mix everything in a small container."
+  ]
+ },
+ {
+  "id": "curated-rice-cake-almond",
+  "name": "Rice cakes with almond butter and banana",
+  "meal_types": [
+   "snack"
+  ],
+  "servings": 1,
+  "prep_minutes": 3,
+  "ingredients": [
+   {
+    "name": "Rice cake",
+    "amount": 18,
+    "unit": "g",
+    "food_id": "common-rice-cake",
+    "calories": 70.0,
+    "protein_g": 1.4,
+    "carbs_g": 14.8,
+    "fat_g": 0.6,
+    "fiber_g": 0.8,
+    "sugar_g": 0.2,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 6.0
+   },
+   {
+    "name": "Almond butter",
+    "amount": 16,
+    "unit": "g",
+    "food_id": "common-almond-butter",
+    "calories": 98.0,
+    "protein_g": 3.4,
+    "carbs_g": 3.0,
+    "fat_g": 8.9,
+    "fiber_g": 1.6,
+    "sugar_g": 0.7,
+    "saturated_fat_g": 0.7,
+    "sodium_mg": 1.0
+   },
+   {
+    "name": "Banana",
+    "amount": 60,
+    "unit": "g",
+    "food_id": "common-banana",
+    "calories": 53.4,
+    "protein_g": 0.7,
+    "carbs_g": 13.7,
+    "fat_g": 0.2,
+    "fiber_g": 1.6,
+    "sugar_g": 7.3,
+    "saturated_fat_g": 0.1,
+    "sodium_mg": 0.5
+   }
+  ],
+  "instructions": [
+   "Spread the almond butter on the rice cakes.",
+   "Top with sliced banana."
+  ]
+ },
+ {
+  "id": "curated-skyr-berries",
+  "name": "Skyr with strawberries",
+  "meal_types": [
+   "snack",
+   "breakfast"
+  ],
+  "servings": 1,
+  "prep_minutes": 2,
+  "ingredients": [
+   {
+    "name": "Skyr, plain",
+    "amount": 150,
+    "unit": "g",
+    "food_id": "common-skyr",
+    "calories": 94.0,
+    "protein_g": 16.5,
+    "carbs_g": 6.0,
+    "fat_g": 0.3,
+    "fiber_g": 0.0,
+    "sugar_g": 6.0,
+    "saturated_fat_g": 0.1,
+    "sodium_mg": 60.0
+   },
+   {
+    "name": "Strawberries",
+    "amount": 80,
+    "unit": "g",
+    "food_id": "common-strawberries",
+    "calories": 25.6,
+    "protein_g": 0.6,
+    "carbs_g": 6.2,
+    "fat_g": 0.2,
+    "fiber_g": 1.6,
+    "sugar_g": 3.9,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 0.8
+   },
+   {
+    "name": "Honey",
+    "amount": 5,
+    "unit": "g",
+    "food_id": "common-honey",
+    "calories": 15.2,
+    "protein_g": 0.0,
+    "carbs_g": 4.1,
+    "fat_g": 0.0,
+    "fiber_g": 0.0,
+    "sugar_g": 4.1,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 0.2
+   }
+  ],
+  "instructions": [
+   "Spoon the skyr into a bowl.",
+   "Top with sliced strawberries and honey."
+  ]
+ },
+ {
+  "id": "curated-eggs-cucumber",
+  "name": "Boiled eggs with cucumber",
+  "meal_types": [
+   "snack"
+  ],
+  "servings": 1,
+  "prep_minutes": 12,
+  "ingredients": [
+   {
+    "name": "Egg, large",
+    "amount": 100,
+    "unit": "g",
+    "food_id": "common-egg",
+    "calories": 156.0,
+    "protein_g": 12.6,
+    "carbs_g": 1.2,
+    "fat_g": 10.6,
+    "fiber_g": 0.0,
+    "sugar_g": 0.4,
+    "saturated_fat_g": 3.2,
+    "sodium_mg": 124.0
+   },
+   {
+    "name": "Cucumber",
+    "amount": 100,
+    "unit": "g",
+    "food_id": "common-cucumber",
+    "calories": 15.0,
+    "protein_g": 0.7,
+    "carbs_g": 3.6,
+    "fat_g": 0.1,
+    "fiber_g": 0.5,
+    "sugar_g": 1.7,
+    "saturated_fat_g": 0.0,
+    "sodium_mg": 2.0
+   }
+  ],
+  "instructions": [
+   "Boil the eggs for 9 minutes and cool them.",
+   "Serve with sliced cucumber."
+  ]
+ },
+ {
+  "id": "curated-banana-protein-shake",
+  "name": "Banana protein shake",
+  "meal_types": [
+   "snack",
+   "breakfast"
+  ],
+  "servings": 1,
+  "prep_minutes": 3,
+  "ingredients": [
+   {
+    "name": "Whey protein powder",
+    "amount": 30,
+    "unit": "g",
+    "food_id": "common-whey-protein",
+    "calories": 120.0,
+    "protein_g": 24.0,
+    "carbs_g": 2.4,
+    "fat_g": 1.8,
+    "fiber_g": 0.0,
+    "sugar_g": 1.2,
+    "saturated_fat_g": 0.9,
+    "sodium_mg": 60.0
+   },
+   {
+    "name": "Almond milk, unsweetened",
+    "amount": 250,
+    "unit": "ml",
+    "food_id": "common-almond-milk",
+    "calories": 32.3,
+    "protein_g": 1.0,
+    "carbs_g": 0.7,
+    "fat_g": 2.7,
+    "fiber_g": 0.5,
+    "sugar_g": 0.0,
+    "saturated_fat_g": 0.2,
+    "sodium_mg": 167.7
+   },
+   {
+    "name": "Banana",
+    "amount": 60,
+    "unit": "g",
+    "food_id": "common-banana",
+    "calories": 53.4,
+    "protein_g": 0.7,
+    "carbs_g": 13.7,
+    "fat_g": 0.2,
+    "fiber_g": 1.6,
+    "sugar_g": 7.3,
+    "saturated_fat_g": 0.1,
+    "sodium_mg": 0.5
+   }
+  ],
+  "instructions": [
+   "Blend everything until smooth."
+  ]
+ }
+]
